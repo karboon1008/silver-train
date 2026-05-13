@@ -134,3 +134,49 @@ describe('DayStrip', () => {
     expect(getByText('Day 2')).toBeTruthy();
   });
 });
+
+import { StopCard } from '../src/features/trips/components/stop-card';
+
+describe('StopCard', () => {
+  it('renders place name and scheduled time', () => {
+    const stop = mockTripDetail.days[0].stops[0];
+    const { getByText } = render(
+      <ThemeProvider>
+        <StopCard stop={stop} isFirst isLast={false} />
+      </ThemeProvider>,
+    );
+    expect(getByText('Eiffel Tower')).toBeTruthy();
+    expect(getByText('9:00 AM')).toBeTruthy();
+  });
+
+  it('renders category badge', () => {
+    const stop = mockTripDetail.days[0].stops[0];
+    const { getByText } = render(
+      <ThemeProvider>
+        <StopCard stop={stop} isFirst isLast={false} />
+      </ThemeProvider>,
+    );
+    expect(getByText('Landmark')).toBeTruthy();
+  });
+
+  it('renders transport pill when transport is present', () => {
+    const stop = mockTripDetail.days[0].stops[1];
+    const { getByText } = render(
+      <ThemeProvider>
+        <StopCard stop={stop} isFirst={false} isLast={false} />
+      </ThemeProvider>,
+    );
+    expect(getByText('18 min')).toBeTruthy();
+    expect(getByText('from Eiffel Tower')).toBeTruthy();
+  });
+
+  it('renders remark text when remark is set', () => {
+    const stop = mockTripDetail.days[0].stops[1];
+    const { getByText } = render(
+      <ThemeProvider>
+        <StopCard stop={stop} isFirst={false} isLast={false} />
+      </ThemeProvider>,
+    );
+    expect(getByText('Book tickets 2 days early')).toBeTruthy();
+  });
+});
