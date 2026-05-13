@@ -136,6 +136,8 @@ describe('DayStrip', () => {
 });
 
 import { StopCard } from '../src/features/trips/components/stop-card';
+import TripDetailScreen from '../src/features/trips/screens/trip-detail';
+import PlaceDetailScreen from '../src/features/trips/screens/place-detail';
 
 describe('StopCard', () => {
   it('renders place name and scheduled time', () => {
@@ -178,5 +180,42 @@ describe('StopCard', () => {
       </ThemeProvider>,
     );
     expect(getByText('Book tickets 2 days early')).toBeTruthy();
+  });
+});
+
+describe('TripDetailScreen', () => {
+  it('renders trip name, map hero, and all days', () => {
+    const { getByText } = render(
+      <ThemeProvider>
+        <TripDetailScreen tripDetail={mockTripDetail} onStopPress={() => undefined} />
+      </ThemeProvider>,
+    );
+    expect(getByText('Paris Weekend')).toBeTruthy();
+    expect(getByText('Day 1')).toBeTruthy();
+    expect(getByText('Day 2')).toBeTruthy();
+  });
+
+  it('renders stops for the default active day', () => {
+    const { getByText } = render(
+      <ThemeProvider>
+        <TripDetailScreen tripDetail={mockTripDetail} onStopPress={() => undefined} />
+      </ThemeProvider>,
+    );
+    expect(getByText('Eiffel Tower')).toBeTruthy();
+  });
+});
+
+describe('PlaceDetailScreen', () => {
+  it('renders place name, category badge, rating, and hours', () => {
+    const place = mockTripDetail.days[0].stops[0].place;
+    const { getByText } = render(
+      <ThemeProvider>
+        <PlaceDetailScreen place={place} remark="" onRemarkChange={() => undefined} />
+      </ThemeProvider>,
+    );
+    expect(getByText('Eiffel Tower')).toBeTruthy();
+    expect(getByText('Landmark')).toBeTruthy();
+    expect(getByText('4.7')).toBeTruthy();
+    expect(getByText('€29.40')).toBeTruthy();
   });
 });
