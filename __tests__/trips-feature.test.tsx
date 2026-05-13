@@ -39,4 +39,13 @@ describe('mock data shapes', () => {
   it('mockTripDetails lookup works by trip id', () => {
     expect(mockTripDetails['1']).toBe(mockTripDetail);
   });
+
+  it('stop with transport has correct segment shape', () => {
+    const stopWithTransport = mockTripDetail.days[0].stops[1];
+    expect(stopWithTransport.transport).toMatchObject({
+      mode: expect.stringMatching(/^(walk|metro|bus|taxi)$/),
+      durationMin: expect.any(Number),
+      routeLabel: expect.any(String),
+    });
+  });
 });
