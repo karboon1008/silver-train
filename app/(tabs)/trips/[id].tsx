@@ -7,7 +7,8 @@ import { routes } from '@/core/constants/routes';
 import type { Stop } from '@/types/trips';
 
 export default function TripDetailRoute() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const rawId = useLocalSearchParams<{ id: string }>().id;
+  const id = Array.isArray(rawId) ? rawId[0] ?? '' : rawId;
   const router = useRouter();
   const tripDetail = mockTripDetails[id];
 
