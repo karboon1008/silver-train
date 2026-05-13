@@ -37,7 +37,7 @@ export function TripCard({ trip, onPress }: Props) {
             <AppText variant="body" weight="600">
               {trip.name}
             </AppText>
-            <AppText variant="label" tone="muted">
+            <AppText variant="caption" tone="muted">
               {trip.destination}
             </AppText>
           </View>
@@ -49,7 +49,7 @@ export function TripCard({ trip, onPress }: Props) {
               backgroundColor: `${theme.semantic.accent}25`,
             }}
           >
-            <AppText variant="caption" weight="600" style={{ color: theme.semantic.accent }}>
+            <AppText variant="caption" weight="600" tone="accent">
               {trip.statusLabel}
             </AppText>
           </View>

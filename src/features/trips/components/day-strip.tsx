@@ -35,7 +35,7 @@ export function DayStrip({ days, activeDay, onDayPress }: Props) {
             }}
           >
             <AppText
-              variant="label"
+              variant="caption"
               weight="600"
               style={{ color: isActive ? theme.semantic.background : theme.semantic.text }}
             >
