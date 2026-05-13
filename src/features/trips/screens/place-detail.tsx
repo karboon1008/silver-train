@@ -15,7 +15,7 @@ export default function PlaceDetailScreen({ place, remark, onRemarkChange }: Pro
   const theme = useAppTheme();
 
   const infoRows = [
-    { label: 'Rating', value: String(place.rating) },
+    { label: 'Rating', value: `★ ${place.rating}` },
     { label: 'Hours', value: place.openingHours },
     { label: 'Admission', value: place.admissionPrice },
   ];

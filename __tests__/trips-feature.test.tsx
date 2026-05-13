@@ -215,7 +215,8 @@ describe('PlaceDetailScreen', () => {
     );
     expect(getByText('Eiffel Tower')).toBeTruthy();
     expect(getByText('Landmark')).toBeTruthy();
-    expect(getByText('4.7')).toBeTruthy();
+    expect(getByText('★ 4.7')).toBeTruthy();
     expect(getByText('€29.40')).toBeTruthy();
+    expect(getByText('9:00 AM – 11:45 PM')).toBeTruthy();
   });
 });
