@@ -37,7 +37,7 @@ export function CategoryBadge({ category }: Props) {
       }}
     >
       <AppText variant="caption">{config.emoji}</AppText>
-      <AppText variant="label" weight="600">
+      <AppText variant="caption" weight="600">
         {config.label}
       </AppText>
     </View>

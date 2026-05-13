@@ -3,11 +3,11 @@ import { AppText } from './app-text';
 import { useAppTheme } from '../theme/theme-provider';
 import type { TransportMode } from '../../types/trips';
 
-const TRANSPORT_CONFIG: Record<TransportMode, { emoji: string; color: string }> = {
-  walk: { emoji: '🚶', color: '#34C759' },
-  metro: { emoji: '🚇', color: '#007AFF' },
-  bus: { emoji: '🚌', color: '#007AFF' },
-  taxi: { emoji: '🚕', color: '#FF9500' },
+const TRANSPORT_CONFIG: Record<TransportMode, { emoji: string; color: string; bgColor: string }> = {
+  walk: { emoji: '🚶', color: '#34C759', bgColor: 'rgba(52,199,89,0.12)' },
+  metro: { emoji: '🚇', color: '#007AFF', bgColor: 'rgba(0,122,255,0.12)' },
+  bus: { emoji: '🚌', color: '#007AFF', bgColor: 'rgba(0,122,255,0.12)' },
+  taxi: { emoji: '🚕', color: '#FF9500', bgColor: 'rgba(255,149,0,0.12)' },
 };
 
 type Props = {
@@ -29,7 +29,7 @@ export function TransportPill({ mode, durationMin, routeLabel }: Props) {
         paddingVertical: 3,
         paddingHorizontal: theme.spacing.sm,
         borderRadius: theme.radii.pill,
-        backgroundColor: `${config.color}20`,
+        backgroundColor: config.bgColor,
         alignSelf: 'flex-start',
       }}
     >
