@@ -25,10 +25,9 @@ export function MapHero({ destination, onExpand }: Props) {
       }}
     >
       <View style={{ alignItems: 'center', gap: theme.spacing.xs }}>
-        <AppText variant="title">🗺️</AppText>
-        <AppText variant="caption" tone="muted">
-          {destination} · Tap to expand
-        </AppText>
+        <AppText variant="body">🗺️</AppText>
+        <AppText variant="caption" tone="muted">{destination}</AppText>
+        <AppText variant="caption" tone="muted">Tap to expand</AppText>
       </View>
     </Pressable>
   );
