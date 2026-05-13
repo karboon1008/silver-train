@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Direction — Smart Travel Planner</title>
+<script src="/helper.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    background: #f5f5f0;
+    color: #1c1c1e;
+    padding: 32px 24px 80px;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-size: 22px;
+    font-weight: 600;
+    letter-spacing: -0.5px;
+    color: #1c1c1e;
+    margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 14px;
+    color: #6e6e73;
+    margin-bottom: 32px;
+    font-weight: 400;
+  }
+
+  /* ─── Phone shell ─── */
+  .showcase {
+    display: flex;
+    gap: 32px;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: flex-start;
+  }
+  .phone-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+  }
+  .phone-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: #6e6e73;
+  }
+  .phone {
+    width: 220px;
+    height: 476px;
+    border-radius: 44px;
+    background: #fff;
+    border: 6px solid #1c1c1e;
+    box-shadow:
+      0 0 0 1px rgba(255,255,255,0.1),
+      0 32px 64px rgba(0,0,0,0.22),
+      inset 0 0 0 1px rgba(0,0,0,0.06);
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+  }
+  .phone-dark {
+    border-color: #2c2c2e;
+    background: #1c1c1e;
+  }
+  .notch-bar {
+    background: #1c1c1e;
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .phone-dark .notch-bar { background: #000; }
+  .notch {
+    width: 90px;
+    height: 22px;
+    background: #1c1c1e;
+    border-radius: 0 0 18px 18px;
+  }
+  .phone-dark .notch { background: #000; }
+
+  /* ─── MAP background ─── */
+  .map-bg {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background:
+      /* map roads overlay */
+      repeating-linear-gradient(0deg, transparent, transparent 38px, rgba(255,255,255,0.55) 38px, rgba(255,255,255,0.55) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 52px, rgba(255,255,255,0.55) 52px, rgba(255,255,255,0.55) 54px),
+      /* base map color — calm sage-stone */
+      linear-gradient(160deg, #dde8d8 0%, #e8e4d8 40%, #d8e0e8 100%);
+  }
+  .map-bg-dark {
+    background:
+      repeating-linear-gradient(0deg, transparent, transparent 38px, rgba(255,255,255,0.07) 38px, rgba(255,255,255,0.07) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 52px, rgba(255,255,255,0.07) 52px, rgba(255,255,255,0.07) 54px),
+      linear-gradient(160deg, #1e2d20 0%, #22211a 40%, #192028 100%);
+  }
+  /* park blob */
+  .map-bg::before {
+    content: '';
+    position: absolute;
+    top: 30px; left: 20px;
+    width: 80px; height: 60px;
+    background: rgba(140,185,120,0.45);
+    border-radius: 40% 60% 55% 45%;
+  }
+  .map-bg-dark::before {
+    background: rgba(80,120,70,0.35);
+  }
+  /* water blob */
+  .map-bg::after {
+    content: '';
+    position: absolute;
+    top: 10px; right: -10px;
+    width: 70px; height: 80px;
+    background: rgba(130,175,210,0.45);
+    border-radius: 55% 45% 40% 60%;
+  }
+  .map-bg-dark::after {
+    background: rgba(60,100,140,0.35);
+  }
+
+  /* map pin */
+  .map-pin {
+    position: absolute;
+    top: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    z-index: 10;
+  }
+  .pin-dot {
+    width: 14px;
+    height: 14px;
+    background: #1c1c1e;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    border: 2px solid #fff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+  }
+  .phone-dark .pin-dot { background: #fff; border-color: #1c1c1e; }
+  .pin-label-bubble {
+    background: #fff;
+    border-radius: 8px;
+    padding: 3px 8px;
+    font-size: 8px;
+    font-weight: 600;
+    color: #1c1c1e;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    margin-top: 4px;
+    white-space: nowrap;
+  }
+  .phone-dark .pin-label-bubble { background: #2c2c2e; color: #fff; }
+
+  /* floating search pill */
+  .search-pill {
+    position: absolute;
+    top: 14px;
+    left: 12px;
+    right: 12px;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 14px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    z-index: 20;
+  }
+  .phone-dark .search-pill {
+    background: rgba(44,44,46,0.88);
+  }
+  .search-icon { font-size: 10px; }
+  .search-text { font-size: 10px; color: #8e8e93; flex: 1; }
+  .phone-dark .search-text { color: #636366; }
+  .search-avatar {
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #a8c5a0, #7faaa0);
+    font-size: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-weight: 600;
+  }
+
+  /* floating card sheet */
+  .bottom-panel {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(255,255,255,0.92);
+    backdrop-filter: blur(28px);
+    -webkit-backdrop-filter: blur(28px);
+    border-radius: 20px 20px 0 0;
+    padding: 10px 14px 14px;
+    z-index: 20;
+    box-shadow: 0 -4px 24px rgba(0,0,0,0.08);
+  }
+  .phone-dark .bottom-panel {
+    background: rgba(28,28,30,0.92);
+  }
+  .drag-handle {
+    width: 36px; height: 4px;
+    background: #c7c7cc;
+    border-radius: 2px;
+    margin: 0 auto 10px;
+  }
+  .phone-dark .drag-handle { background: #48484a; }
+  .trip-label {
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: #8e8e93;
+    margin-bottom: 8px;
+  }
+
+  /* trip card */
+  .trip-card {
+    background: #f2f2f7;
+    border-radius: 14px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .phone-dark .trip-card { background: #2c2c2e; }
+  .trip-thumb {
+    width: 42px; height: 42px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    flex-shrink: 0;
+  }
+  .trip-info { flex: 1; min-width: 0; }
+  .trip-name { font-size: 11px; font-weight: 600; color: #1c1c1e; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .phone-dark .trip-name { color: #f2f2f7; }
+  .trip-date { font-size: 9px; color: #8e8e93; margin-top: 2px; }
+  .trip-chevron { font-size: 10px; color: #c7c7cc; }
+
+  /* day pill strip */
+  .day-strip {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+    overflow: hidden;
+  }
+  .day-pill {
+    flex: 1;
+    background: #f2f2f7;
+    border-radius: 10px;
+    padding: 5px 4px;
+    text-align: center;
+    font-size: 8px;
+    color: #8e8e93;
+  }
+  .phone-dark .day-pill { background: #2c2c2e; }
+  .day-pill.active {
+    background: #1c1c1e;
+    color: #fff;
+  }
+  .phone-dark .day-pill.active { background: #f2f2f7; color: #1c1c1e; }
+  .day-num { font-size: 11px; font-weight: 600; display: block; }
+
+  /* activity row */
+  .activity-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 0;
+    border-bottom: 0.5px solid rgba(0,0,0,0.06);
+  }
+  .phone-dark .activity-row { border-color: rgba(255,255,255,0.06); }
+  .activity-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: #8e8e93;
+    flex-shrink: 0;
+  }
+  .activity-dot.green { background: #34c759; }
+  .activity-dot.blue { background: #007aff; }
+  .activity-dot.orange { background: #ff9500; }
+  .activity-text { font-size: 9px; color: #3a3a3c; flex: 1; }
+  .phone-dark .activity-text { color: #aeaeb2; }
+  .activity-time { font-size: 8px; color: #8e8e93; }
+
+  /* tab bar */
+  .tab-bar {
+    background: rgba(255,255,255,0.9);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 0.5px solid rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-around;
+    padding: 8px 0 12px;
+    flex-shrink: 0;
+  }
+  .phone-dark .tab-bar {
+    background: rgba(28,28,30,0.9);
+    border-color: rgba(255,255,255,0.1);
+  }
+  .tab-item { text-align: center; }
+  .tab-icon-img { font-size: 16px; }
+  .tab-name {
+    display: block;
+    font-size: 7px;
+    margin-top: 2px;
+    color: #8e8e93;
+    font-weight: 500;
+  }
+  .tab-item.active .tab-name { color: #1c1c1e; }
+  .phone-dark .tab-item.active .tab-name { color: #f2f2f7; }
+  .tab-item.active .tab-icon-img { filter: brightness(0); }
+  .phone-dark .tab-item.active .tab-icon-img { filter: brightness(5); }
+
+  /* ─── Colour palette section ─── */
+  .palette-row {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0 8px;
+    flex-wrap: wrap;
+  }
+  .swatch-group { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .swatch {
+    width: 48px; height: 48px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  }
+  .swatch-label { font-size: 9px; color: #6e6e73; text-align: center; font-weight: 500; }
+
+  /* ─── Typography specimens ─── */
+  .type-row { display: flex; flex-direction: column; gap: 6px; margin: 12px 0; }
+  .type-specimen {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+  .type-role { font-size: 9px; color: #8e8e93; width: 64px; flex-shrink: 0; font-weight: 500; text-transform: uppercase; letter-spacing: 0.4px; }
+  .type-sample { color: #1c1c1e; }
+
+  /* ─── Detail section wrapper ─── */
+  .detail-section {
+    background: #fff;
+    border-radius: 18px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+  }
+  .section-heading {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1c1c1e;
+    margin-bottom: 4px;
+    letter-spacing: -0.2px;
+  }
+  .section-sub {
+    font-size: 12px;
+    color: #6e6e73;
+    margin-bottom: 16px;
+    line-height: 1.4;
+  }
+
+  /* ─── Microinteraction chips ─── */
+  .chip-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+  .chip {
+    background: #f2f2f7;
+    border-radius: 20px;
+    padding: 5px 12px;
+    font-size: 11px;
+    color: #3a3a3c;
+    font-weight: 500;
+  }
+
+  /* ─── Page header ─── */
+  .page-header {
+    margin-bottom: 28px;
+  }
+  .design-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #1c1c1e;
+    color: #f2f2f7;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 12px;
+  }
+
+  /* ─── Selection bar ─── */
+  #selection-indicator {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(255,255,255,0.94);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-top: 0.5px solid rgba(0,0,0,0.1);
+    padding: 14px 24px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #1c1c1e;
+    display: none;
+    z-index: 100;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .confirm-btn {
+    background: #1c1c1e;
+    color: #fff;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 20px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="design-tag">✦ Design Direction</div>
+  <h1>Neo-Minimalism · Apple-Inspired · Map-First</h1>
+  <p class="subtitle" style="margin-bottom:0">Calm lifestyle travel — spacious, tactile, unhurried. Here's how this aesthetic translates across the app.</p>
+</div>
+
+<!-- PHONES: Light + Dark side by side -->
+<div class="detail-section">
+  <div class="section-heading">Map-First Home Screen</div>
+  <div class="section-sub">The map is always the canvas. Cards and sheets float above it with frosted glass. Navigation stays minimal — four tabs, thin labels.</div>
+
+  <div class="showcase">
+
+    <!-- Light mode: Home / map view -->
+    <div class="phone-wrap">
+      <div class="phone-label">Light — Home</div>
+      <div class="phone">
+        <div class="notch-bar"><div class="notch"></div></div>
+        <div class="map-bg" style="flex:1; position:relative;">
+          <!-- Search pill -->
+          <div class="search-pill">
+            <span class="search-icon">🔍</span>
+            <span class="search-text">Where to next?</span>
+            <div class="search-avatar">K</div>
+          </div>
+          <!-- Pin -->
+          <div class="map-pin" style="top:80px; left:55%;">
+            <div style="background:#fff;border-radius:50% 50% 50% 0;transform:rotate(-45deg);width:12px;height:12px;border:2px solid #1c1c1e;box-shadow:0 2px 6px rgba(0,0,0,0.2);"></div>
+            <div class="pin-label-bubble">Paris ✈️</div>
+          </div>
+          <!-- Secondary pin -->
+          <div class="map-pin" style="top:120px; left:30%;">
+            <div style="background:#8e8e93;border-radius:50%;width:7px;height:7px;border:1.5px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,0.2);"></div>
+          </div>
+          <!-- Bottom panel -->
+          <div class="bottom-panel">
+            <div class="drag-handle"></div>
+            <div class="trip-label">Upcoming Trip</div>
+            <div class="trip-card">
+              <div class="trip-thumb" style="background:linear-gradient(135deg,#dde8d8,#b8d4c8);">🗼</div>
+              <div class="trip-info">
+                <div class="trip-name">Paris, France</div>
+                <div class="trip-date">Jun 12 – Jun 18 · 6 days</div>
+              </div>
+              <div class="trip-chevron">›</div>
+            </div>
+            <div class="trip-label" style="margin-top:4px;">Suggested Nearby</div>
+            <div class="trip-card" style="margin-bottom:0; opacity:0.6;">
+              <div class="trip-thumb" style="background:linear-gradient(135deg,#e8e4d8,#d4c8b8);">🏛️</div>
+              <div class="trip-info">
+                <div class="trip-name">Versailles</div>
+                <div class="trip-date">45 min · Day trip idea</div>
+              </div>
+              <div class="trip-chevron">›</div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item active"><div class="tab-icon-img">🗺️</div><span class="tab-name">Map</span></div>
+          <div class="tab-item"><div class="tab-icon-img">✈️</div><span class="tab-name">Trips</span></div>
+          <div class="tab-item"><div class="tab-icon-img">✦</div><span class="tab-name">Explore</span></div>
+          <div class="tab-item"><div class="tab-icon-img">◯</div><span class="tab-name">Profile</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dark mode: Itinerary view -->
+    <div class="phone-wrap">
+      <div class="phone-label">Dark — Itinerary</div>
+      <div class="phone phone-dark">
+        <div class="notch-bar"><div class="notch"></div></div>
+        <div class="map-bg map-bg-dark" style="flex:1; position:relative;">
+          <!-- Search pill dark -->
+          <div class="search-pill" style="background:rgba(44,44,46,0.88);">
+            <span class="search-icon">←</span>
+            <span class="search-text" style="color:#f2f2f7; font-size:11px; font-weight:600;">Paris, France</span>
+          </div>
+          <!-- Pins for itinerary stops -->
+          <div class="map-pin" style="top:70px;left:40%;">
+            <div style="background:#34c759;border-radius:50% 50% 50% 0;transform:rotate(-45deg);width:10px;height:10px;border:2px solid #1c1c1e;"></div>
+            <div style="background:#2c2c2e;color:#f2f2f7;border-radius:6px;padding:2px 6px;font-size:7px;font-weight:600;margin-top:3px;box-shadow:0 2px 6px rgba(0,0,0,0.4);">Eiffel Tower</div>
+          </div>
+          <div class="map-pin" style="top:110px;left:62%;">
+            <div style="background:#007aff;border-radius:50%;width:7px;height:7px;border:1.5px solid #2c2c2e;"></div>
+          </div>
+          <!-- Itinerary sheet -->
+          <div class="bottom-panel" style="background:rgba(28,28,30,0.94);">
+            <div class="drag-handle"></div>
+            <!-- Day strip -->
+            <div class="day-strip">
+              <div class="day-pill"><span class="day-num">12</span>Thu</div>
+              <div class="day-pill active"><span class="day-num">13</span>Fri</div>
+              <div class="day-pill"><span class="day-num">14</span>Sat</div>
+              <div class="day-pill"><span class="day-num">15</span>Sun</div>
+            </div>
+            <div class="activity-row">
+              <div class="activity-dot green"></div>
+              <div class="activity-text">Eiffel Tower visit</div>
+              <div class="activity-time">9:00 AM</div>
+            </div>
+            <div class="activity-row">
+              <div class="activity-dot blue"></div>
+              <div class="activity-text">Lunch — Café de Flore</div>
+              <div class="activity-time">12:30 PM</div>
+            </div>
+            <div class="activity-row" style="border:none;">
+              <div class="activity-dot orange"></div>
+              <div class="activity-text" style="color:#636366;">+ Add activity</div>
+              <div class="activity-time"></div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-bar" style="background:rgba(28,28,30,0.9);border-color:rgba(255,255,255,0.1);">
+          <div class="tab-item"><div class="tab-icon-img">🗺️</div><span class="tab-name">Map</span></div>
+          <div class="tab-item active"><div class="tab-icon-img" style="filter:brightness(5)">✈️</div><span class="tab-name" style="color:#f2f2f7">Trips</span></div>
+          <div class="tab-item"><div class="tab-icon-img">✦</div><span class="tab-name">Explore</span></div>
+          <div class="tab-item"><div class="tab-icon-img">◯</div><span class="tab-name">Profile</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- COLOUR PALETTE -->
+<div class="detail-section">
+  <div class="section-heading">Colour Palette — Calm & Earthy</div>
+  <div class="section-sub">Neo-minimalism with warmth. Stone, sage, and slate replace saturated colour. Black and white carry the hierarchy.</div>
+  <div class="palette-row">
+    <div class="swatch-group"><div class="swatch" style="background:#1c1c1e;"></div><div class="swatch-label">Ink<br>#1c1c1e</div></div>
+    <div class="swatch-group"><div class="swatch" style="background:#f5f5f0;"></div><div class="swatch-label">Parchment<br>#f5f5f0</div></div>
+    <div class="swatch-group"><div class="swatch" style="background:#a8c5a0;border:1px solid rgba(0,0,0,0.06)"></div><div class="swatch-label">Sage<br>#a8c5a0</div></div>
+    <div class="swatch-group"><div class="swatch" style="background:#b8ccd8;border:1px solid rgba(0,0,0,0.06)"></div><div class="swatch-label">Slate<br>#b8ccd8</div></div>
+    <div class="swatch-group"><div class="swatch" style="background:#d4c4a8;border:1px solid rgba(0,0,0,0.06)"></div><div class="swatch-label">Stone<br>#d4c4a8</div></div>
+    <div class="swatch-group"><div class="swatch" style="background:#8e8e93;"></div><div class="swatch-label">Mist<br>#8e8e93</div></div>
+  </div>
+</div>
+
+<!-- TYPOGRAPHY -->
+<div class="detail-section">
+  <div class="section-heading">Typography — SF Pro Scale</div>
+  <div class="section-sub">System font (SF Pro on iOS, Inter fallback). Thin weight for display, semibold for labels. Generous tracking and line height.</div>
+  <div class="type-row">
+    <div class="type-specimen">
+      <div class="type-role">Display</div>
+      <div class="type-sample" style="font-size:28px;font-weight:200;letter-spacing:-1px;line-height:1.1">Paris</div>
+    </div>
+    <div class="type-specimen">
+      <div class="type-role">Title</div>
+      <div class="type-sample" style="font-size:20px;font-weight:600;letter-spacing:-0.4px;">My Trips</div>
+    </div>
+    <div class="type-specimen">
+      <div class="type-role">Body</div>
+      <div class="type-sample" style="font-size:15px;font-weight:400;color:#3a3a3c;line-height:1.5">Jun 12 – Jun 18 · 6 days</div>
+    </div>
+    <div class="type-specimen">
+      <div class="type-role">Caption</div>
+      <div class="type-sample" style="font-size:11px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:#8e8e93">Upcoming Trip</div>
+    </div>
+  </div>
+</div>
+
+<!-- MICROINTERACTIONS -->
+<div class="detail-section">
+  <div class="section-heading">Microinteractions & Gestures</div>
+  <div class="section-sub">Every touch has a response. Subtle, physical, never showy.</div>
+  <div class="chip-row">
+    <div class="chip">↕ Sheet drag to expand</div>
+    <div class="chip">↔ Card swipe to dismiss</div>
+    <div class="chip">Long-press to reorder stops</div>
+    <div class="chip">Pinch to zoom map</div>
+    <div class="chip">Haptic on add</div>
+    <div class="chip">Spring bounce on drop</div>
+    <div class="chip">Fade-in on screen arrive</div>
+    <div class="chip">Tap-to-ripple map pin</div>
+  </div>
+</div>
+
+<div id="selection-indicator">
+  <span id="selection-text">Looking good?</span>
+  <button class="confirm-btn" onclick="confirmSelection()">Looks good →</button>
+</div>
+
+<script>
+function confirmSelection() {
+  if (window.__brainstormConfirm) window.__brainstormConfirm('approve');
+}
+// Show indicator after a moment
+setTimeout(() => {
+  const el = document.getElementById('selection-indicator');
+  el.style.display = 'flex';
+}, 1200);
+</script>
+
+</body>
+</html>

@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Place Detail Screen</title>
+<script src="/helper.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    background: #f5f5f0;
+    color: #1c1c1e;
+    padding: 32px 24px 60px;
+  }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #6e6e73; margin-bottom: 28px; line-height: 1.5; }
+  .tag { display:inline-block;background:#1c1c1e;color:#f5f5f0;font-size:10px;font-weight:600;letter-spacing:0.5px;padding:4px 10px;border-radius:20px;margin-bottom:12px; }
+
+  .section-card { background:#fff;border-radius:20px;padding:22px;box-shadow:0 1px 4px rgba(0,0,0,0.07);margin-bottom:20px; }
+  .section-title { font-size:15px;font-weight:600;letter-spacing:-0.2px;margin-bottom:4px; }
+  .section-sub { font-size:12px;color:#6e6e73;margin-bottom:16px;line-height:1.5; }
+
+  /* ── phone pair ── */
+  .phone-pair { display:flex;gap:28px;justify-content:center;flex-wrap:wrap; }
+  .phone-wrap { display:flex;flex-direction:column;align-items:center;gap:10px; }
+  .phone-label { font-size:10px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:#6e6e73; }
+
+  .phone {
+    width:218px;
+    border-radius:42px;
+    background:#fff;
+    border:5.5px solid #1c1c1e;
+    box-shadow:0 24px 56px rgba(0,0,0,0.18),inset 0 0 0 1px rgba(0,0,0,0.05);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .phone-dark { background:#1c1c1e;border-color:#2c2c2e; }
+  .notch-bar { background:#1c1c1e;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+  .phone-dark .notch-bar { background:#000; }
+  .notch { width:80px;height:20px;background:#1c1c1e;border-radius:0 0 16px 16px; }
+  .phone-dark .notch { background:#000; }
+
+  /* hero image */
+  .place-hero {
+    height:110px;
+    background: linear-gradient(160deg, #dde8d8, #c8d8e8);
+    position:relative;
+    flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:40px;
+  }
+  .place-hero-dark { background: linear-gradient(160deg, #1e2d20, #192028); }
+  .hero-back {
+    position:absolute;top:8px;left:10px;
+    background:rgba(255,255,255,0.82);backdrop-filter:blur(10px);
+    border-radius:8px;padding:3px 9px;font-size:8px;font-weight:600;color:#1c1c1e;
+  }
+  .phone-dark .hero-back { background:rgba(44,44,46,0.82);color:#f5f5f0; }
+  .hero-save {
+    position:absolute;top:8px;right:10px;
+    background:rgba(255,255,255,0.82);backdrop-filter:blur(10px);
+    border-radius:8px;padding:3px 8px;font-size:10px;color:#1c1c1e;
+  }
+  .phone-dark .hero-save { background:rgba(44,44,46,0.82);color:#f5f5f0; }
+
+  /* scrollable body */
+  .place-body {
+    flex:1;overflow:hidden;
+    background:#f5f5f0;
+    display:flex;flex-direction:column;
+    gap:0;
+  }
+  .phone-dark .place-body { background:#1c1c1e; }
+
+  /* name row */
+  .name-section {
+    background:#fff;
+    padding:10px 12px 8px;
+    margin-bottom:6px;
+  }
+  .phone-dark .name-section { background:#2c2c2e; }
+  .name-row { display:flex;align-items:center;gap:8px;margin-bottom:4px; }
+  .place-thumb {
+    width:32px;height:32px;border-radius:8px;
+    background:linear-gradient(135deg,#dde8d8,#b8d4c8);
+    display:flex;align-items:center;justify-content:center;
+    font-size:16px;flex-shrink:0;
+    box-shadow:0 1px 4px rgba(0,0,0,0.1);
+  }
+  .place-name { font-size:13px;font-weight:600;color:#1c1c1e;flex:1;letter-spacing:-0.2px; }
+  .phone-dark .place-name { color:#f5f5f0; }
+
+  /* category badge */
+  .cat-badge {
+    display:inline-flex;align-items:center;gap:4px;
+    background:#f2f2f7;border-radius:6px;
+    padding:3px 8px;font-size:9px;font-weight:600;color:#3a3a3c;
+    margin-bottom:6px;
+  }
+  .phone-dark .cat-badge { background:#3a3a3c;color:#aeaeb2; }
+
+  /* remark */
+  .remark-row {
+    display:flex;align-items:flex-start;gap:6px;
+    background:#f9f9f6;border-radius:8px;
+    padding:6px 8px;
+  }
+  .phone-dark .remark-row { background:#3a3a3c; }
+  .remark-pencil { font-size:9px;color:#8e8e93;margin-top:1px;flex-shrink:0; }
+  .remark-text { font-size:9px;color:#8e8e93;flex:1;line-height:1.4;font-style:italic; }
+  .remark-text.filled { color:#3a3a3c;font-style:normal; }
+  .phone-dark .remark-text.filled { color:#aeaeb2; }
+
+  /* transport section */
+  .transport-section {
+    background:#fff;
+    padding:10px 12px;
+    margin-bottom:6px;
+  }
+  .phone-dark .transport-section { background:#2c2c2e; }
+  .transport-label {
+    font-size:9px;font-weight:700;color:#8e8e93;
+    letter-spacing:0.5px;text-transform:uppercase;margin-bottom:8px;
+  }
+  .transport-row { display:flex;flex-direction:column;gap:5px; }
+  .transport-item {
+    display:flex;align-items:center;gap:8px;
+    padding:6px 8px;background:#f9f9f6;border-radius:10px;
+  }
+  .phone-dark .transport-item { background:#3a3a3c; }
+  .transport-icon { font-size:14px;width:22px;text-align:center;flex-shrink:0; }
+  .transport-mode { font-size:10px;font-weight:500;color:#3a3a3c;flex:1; }
+  .phone-dark .transport-mode { color:#aeaeb2; }
+  .transport-time {
+    font-size:10px;font-weight:600;
+    color:#007aff;
+    background:rgba(0,122,255,0.1);
+    border-radius:6px;padding:2px 7px;
+    cursor:pointer;
+    flex-shrink:0;
+  }
+  .phone-dark .transport-time { background:rgba(0,122,255,0.15); }
+
+  /* info section */
+  .info-section {
+    background:#fff;
+    padding:10px 12px;
+    margin-bottom:6px;
+  }
+  .phone-dark .info-section { background:#2c2c2e; }
+  .info-row { display:flex;align-items:center;gap:8px;padding:4px 0;border-bottom:0.5px solid rgba(0,0,0,0.06); }
+  .phone-dark .info-row { border-color:rgba(255,255,255,0.07); }
+  .info-row:last-child { border-bottom:none; }
+  .info-icon { font-size:11px;width:16px;text-align:center;flex-shrink:0; }
+  .info-text { font-size:10px;color:#3a3a3c;flex:1; }
+  .phone-dark .info-text { color:#aeaeb2; }
+
+  /* ── map-app picker sheet ── */
+  .sheet-demo {
+    background:#fff;border-radius:20px;padding:22px;box-shadow:0 1px 4px rgba(0,0,0,0.07);margin-bottom:20px;
+  }
+  .sheet-wrap {
+    display:flex;justify-content:center;margin-top:12px;
+  }
+  .bottom-sheet-mock {
+    background:#fff;border-radius:20px 20px 16px 16px;
+    width:218px;padding:12px 14px 16px;
+    box-shadow:0 -4px 32px rgba(0,0,0,0.14);
+    border:1px solid rgba(0,0,0,0.06);
+  }
+  .sheet-handle { width:36px;height:4px;background:#c7c7cc;border-radius:2px;margin:0 auto 12px; }
+  .sheet-title { font-size:13px;font-weight:600;color:#1c1c1e;margin-bottom:4px;text-align:center; }
+  .sheet-sub { font-size:10px;color:#8e8e93;margin-bottom:12px;text-align:center; }
+  .map-apps { display:flex;flex-direction:column;gap:8px; }
+  .map-app-btn {
+    display:flex;align-items:center;gap:10px;
+    background:#f2f2f7;border-radius:12px;padding:9px 12px;
+  }
+  .app-icon { width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0; }
+  .app-name { font-size:11px;font-weight:600;color:#1c1c1e;flex:1; }
+  .app-arrow { font-size:11px;color:#c7c7cc; }
+  .sheet-cancel {
+    margin-top:10px;background:#f2f2f7;border-radius:12px;
+    padding:9px;text-align:center;font-size:11px;font-weight:600;color:#ff3b30;
+  }
+
+  /* ── annotation legend ── */
+  .legend { display:flex;flex-direction:column;gap:8px;margin-top:4px; }
+  .legend-row { display:flex;align-items:flex-start;gap:10px; }
+  .legend-num {
+    width:20px;height:20px;border-radius:50%;background:#1c1c1e;color:#fff;
+    font-size:9px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+  }
+  .legend-text { font-size:12px;color:#3a3a3c;line-height:1.5; }
+  .legend-text strong { color:#1c1c1e; }
+</style>
+</head>
+<body>
+
+<div class="tag">✦ Design · Place Detail Screen</div>
+<h1>Place Detail</h1>
+<p class="subtitle">Updated with image icon, category, editable remark, transport options with time, and map app redirect.</p>
+
+<!-- PHONE PAIR -->
+<div class="section-card">
+  <div class="section-title">Screen Mockup — Light & Dark</div>
+  <div class="section-sub">Left: light mode. Right: dark mode. Both show the same Place Detail for "Eiffel Tower".</div>
+
+  <div class="phone-pair">
+
+    <!-- LIGHT -->
+    <div class="phone-wrap">
+      <div class="phone-label">Light Mode</div>
+      <div class="phone">
+        <div class="notch-bar"><div class="notch"></div></div>
+        <!-- Hero -->
+        <div class="place-hero">
+          🗼
+          <div class="hero-back">← Back</div>
+          <div class="hero-save">♡</div>
+        </div>
+        <div class="place-body">
+          <!-- ① Name + thumb + category + remark -->
+          <div class="name-section">
+            <div class="name-row">
+              <div class="place-thumb">🗼</div>
+              <div class="place-name">Eiffel Tower</div>
+            </div>
+            <div class="cat-badge">🏛️ Landmark</div>
+            <div class="remark-row">
+              <div class="remark-pencil">✎</div>
+              <div class="remark-text filled">Book tickets 2 days early. Skip summit in winter.</div>
+            </div>
+          </div>
+          <!-- ② Transport -->
+          <div class="transport-section">
+            <div class="transport-label">Getting There</div>
+            <div class="transport-row">
+              <div class="transport-item">
+                <div class="transport-icon">🚶</div>
+                <div class="transport-mode">Walk</div>
+                <div class="transport-time">18 min</div>
+              </div>
+              <div class="transport-item">
+                <div class="transport-icon">🚇</div>
+                <div class="transport-mode">Metro · Line 6</div>
+                <div class="transport-time">8 min</div>
+              </div>
+              <div class="transport-item">
+                <div class="transport-icon">🚌</div>
+                <div class="transport-mode">Bus · 82</div>
+                <div class="transport-time">12 min</div>
+              </div>
+              <div class="transport-item">
+                <div class="transport-icon">🚕</div>
+                <div class="transport-mode">Taxi / Ride</div>
+                <div class="transport-time">6 min</div>
+              </div>
+            </div>
+          </div>
+          <!-- ③ Info rows -->
+          <div class="info-section">
+            <div class="info-row">
+              <div class="info-icon">🕙</div>
+              <div class="info-text">Open: 9:00 AM – 11:45 PM</div>
+            </div>
+            <div class="info-row">
+              <div class="info-icon">⭐</div>
+              <div class="info-text">4.7 · 284k reviews</div>
+            </div>
+            <div class="info-row">
+              <div class="info-icon">🎟️</div>
+              <div class="info-text">From €18 · Book in advance</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DARK -->
+    <div class="phone-wrap">
+      <div class="phone-label">Dark Mode</div>
+      <div class="phone phone-dark">
+        <div class="notch-bar"><div class="notch"></div></div>
+        <!-- Hero -->
+        <div class="place-hero place-hero-dark">
+          🗼
+          <div class="hero-back">← Back</div>
+          <div class="hero-save">♡</div>
+        </div>
+        <div class="place-body">
+          <!-- Name + thumb + category + remark -->
+          <div class="name-section">
+            <div class="name-row">
+              <div class="place-thumb" style="background:linear-gradient(135deg,#2d3d2d,#1e2d3d);">🗼</div>
+              <div class="place-name">Eiffel Tower</div>
+            </div>
+            <div class="cat-badge">🏛️ Landmark</div>
+            <div class="remark-row">
+              <div class="remark-pencil">✎</div>
+              <div class="remark-text" style="color:#636366;font-style:italic;">Add a remark…</div>
+            </div>
+          </div>
+          <!-- Transport -->
+          <div class="transport-section">
+            <div class="transport-label">Getting There</div>
+            <div class="transport-row">
+              <div class="transport-item">
+                <div class="transport-icon">🚶</div>
+                <div class="transport-mode">Walk</div>
+                <div class="transport-time">18 min</div>
+              </div>
+              <div class="transport-item">
+                <div class="transport-icon">🚇</div>
+                <div class="transport-mode">Metro · Line 6</div>
+                <div class="transport-time">8 min</div>
+              </div>
+              <div class="transport-item">
+                <div class="transport-icon">🚌</div>
+                <div class="transport-mode">Bus · 82</div>
+                <div class="transport-time">12 min</div>
+              </div>
+              <div class="transport-item">
+                <div class="transport-icon">🚕</div>
+                <div class="transport-mode">Taxi / Ride</div>
+                <div class="transport-time">6 min</div>
+              </div>
+            </div>
+          </div>
+          <!-- Info -->
+          <div class="info-section">
+            <div class="info-row">
+              <div class="info-icon">🕙</div>
+              <div class="info-text">Open: 9:00 AM – 11:45 PM</div>
+            </div>
+            <div class="info-row">
+              <div class="info-icon">⭐</div>
+              <div class="info-text">4.7 · 284k reviews</div>
+            </div>
+            <div class="info-row">
+              <div class="info-icon">🎟️</div>
+              <div class="info-text">From €18 · Book in advance</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MAP APP PICKER -->
+<div class="sheet-demo">
+  <div class="section-title">Transport Time Tap → Map App Picker</div>
+  <div class="section-sub">When the user taps any transport time (e.g. "8 min"), a bottom sheet slides up asking which map app to open. The app deep-links to the place's coordinates.</div>
+  <div class="sheet-wrap">
+    <div class="bottom-sheet-mock">
+      <div class="sheet-handle"></div>
+      <div class="sheet-title">Open in Maps</div>
+      <div class="sheet-sub">Metro · Line 6 · 8 min to Eiffel Tower</div>
+      <div class="map-apps">
+        <div class="map-app-btn">
+          <div class="app-icon" style="background:linear-gradient(135deg,#34c759,#007aff);">🗺️</div>
+          <div class="app-name">Apple Maps</div>
+          <div class="app-arrow">›</div>
+        </div>
+        <div class="map-app-btn">
+          <div class="app-icon" style="background:#fff;border:1px solid #e5e5ea;">
+            <span style="font-size:12px;">📍</span>
+          </div>
+          <div class="app-name">Google Maps</div>
+          <div class="app-arrow">›</div>
+        </div>
+        <div class="map-app-btn">
+          <div class="app-icon" style="background:linear-gradient(135deg,#33ccff,#0099cc);">🔵</div>
+          <div class="app-name">Waze</div>
+          <div class="app-arrow">›</div>
+        </div>
+        <div class="map-app-btn">
+          <div class="app-icon" style="background:linear-gradient(135deg,#ff6600,#cc3300);">🟠</div>
+          <div class="app-name">Grab / Local App</div>
+          <div class="app-arrow">›</div>
+        </div>
+      </div>
+      <div class="sheet-cancel">Cancel</div>
+    </div>
+  </div>
+</div>
+
+<!-- ANNOTATION LEGEND -->
+<div class="section-card">
+  <div class="section-title">Feature Breakdown</div>
+  <div class="legend">
+    <div class="legend-row">
+      <div class="legend-num">1</div>
+      <div class="legend-text"><strong>Image icon beside name</strong> — Small 32×32 thumbnail (rounded square) pulled from the place's photo. Falls back to a category emoji if no photo available.</div>
+    </div>
+    <div class="legend-row">
+      <div class="legend-num">2</div>
+      <div class="legend-text"><strong>Category badge</strong> — Pill tag below name: 🏨 Accommodation · 🛍️ Mall · 🚉 Station · 🏛️ Landmark · 🍽️ Restaurant · 🌿 Nature · 🎭 Entertainment. Sourced from Google Places type.</div>
+    </div>
+    <div class="legend-row">
+      <div class="legend-num">3</div>
+      <div class="legend-text"><strong>Editable remark</strong> — Tappable text field below category. Pencil (✎) icon on the left signals editability. Saves to Supabase on blur. Empty state shows "Add a remark…" in muted italic.</div>
+    </div>
+    <div class="legend-row">
+      <div class="legend-num">4</div>
+      <div class="legend-text"><strong>Transport rows</strong> — Walk, Metro, Bus, Taxi shown with mode icon, line/route label, and estimated duration from the previous itinerary stop. Times fetched from Google Directions API.</div>
+    </div>
+    <div class="legend-row">
+      <div class="legend-num">5</div>
+      <div class="legend-text"><strong>Time tap → map redirect</strong> — Tapping the blue time pill opens a bottom sheet listing installed map apps (Apple Maps, Google Maps, Waze, Grab). Selection deep-links with the destination's lat/lng and selected transport mode pre-filled.</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

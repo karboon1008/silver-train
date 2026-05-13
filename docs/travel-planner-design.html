@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4; margin: 0; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif; background: #fff; color: #1c1c1e; }
+
+  /* ── PAGE BREAKS ── */
+  .page { width: 210mm; min-height: 297mm; padding: 14mm 16mm; page-break-after: always; position: relative; overflow: hidden; }
+  .page:last-child { page-break-after: auto; }
+
+  /* ── COVER ── */
+  .cover { background: #1c1c1e; display: flex; flex-direction: column; justify-content: space-between; }
+  .cover-top { padding-top: 8mm; }
+  .cover-tag { display: inline-block; background: rgba(168,197,160,0.2); border: 1px solid #a8c5a0; color: #a8c5a0; font-size: 9px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; padding: 4px 12px; border-radius: 20px; margin-bottom: 10mm; }
+  .cover-title { font-size: 36px; font-weight: 200; color: #f5f5f0; letter-spacing: -1px; line-height: 1.1; margin-bottom: 4mm; }
+  .cover-title strong { font-weight: 600; }
+  .cover-sub { font-size: 13px; color: #636366; line-height: 1.6; max-width: 120mm; }
+  .cover-phones { display: flex; gap: 10mm; justify-content: center; align-items: flex-end; margin: 8mm 0; }
+  .cover-stack { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8mm; }
+  .stack-pill { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12); color: #aeaeb2; font-size: 9px; font-weight: 500; padding: 3px 10px; border-radius: 20px; }
+  .cover-meta { font-size: 10px; color: #48484a; padding-bottom: 4mm; }
+
+  /* ── SECTION HEADERS ── */
+  .section-label { font-size: 8px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: #8e8e93; margin-bottom: 3mm; }
+  .section-title { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; color: #1c1c1e; margin-bottom: 2mm; }
+  .section-sub { font-size: 11px; color: #6e6e73; line-height: 1.5; margin-bottom: 6mm; }
+  .divider { height: 1px; background: #f2f2f7; margin: 5mm 0; }
+
+  /* ── PHONE SHELL ── */
+  .phones-row { display: flex; gap: 10mm; justify-content: center; align-items: flex-start; margin: 4mm 0; }
+  .phone-col { display: flex; flex-direction: column; align-items: center; gap: 3mm; }
+  .phone-lbl { font-size: 8px; font-weight: 700; letter-spacing: 0.6px; text-transform: uppercase; color: #8e8e93; }
+  .phone {
+    width: 68mm; border-radius: 13mm; background: #fff;
+    border: 1.8mm solid #1c1c1e;
+    box-shadow: 0 8mm 20mm rgba(0,0,0,0.18), inset 0 0 0 0.3mm rgba(0,0,0,0.05);
+    overflow: hidden; display: flex; flex-direction: column;
+  }
+  .phone-dark { background: #1c1c1e; border-color: #2c2c2e; }
+  .notch-bar { background: #1c1c1e; height: 8mm; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .phone-dark .notch-bar { background: #000; }
+  .notch { width: 22mm; height: 5.5mm; background: #1c1c1e; border-radius: 0 0 4mm 4mm; }
+  .phone-dark .notch { background: #000; }
+  .p-status { display: flex; justify-content: space-between; padding: 1.5mm 4mm 0; font-size: 6px; color: #8e8e93; flex-shrink: 0; }
+
+  /* map hero */
+  .map-h {
+    height: 26mm; position: relative; flex-shrink: 0;
+    background: repeating-linear-gradient(0deg,transparent,transparent 5mm,rgba(255,255,255,0.55) 5mm,rgba(255,255,255,0.55) 5.5mm),
+                repeating-linear-gradient(90deg,transparent,transparent 7mm,rgba(255,255,255,0.55) 7mm,rgba(255,255,255,0.55) 7.5mm),
+                linear-gradient(160deg,#dde8d8,#d8e0e8);
+  }
+  .map-h-dark {
+    background: repeating-linear-gradient(0deg,transparent,transparent 5mm,rgba(255,255,255,0.07) 5mm,rgba(255,255,255,0.07) 5.5mm),
+                repeating-linear-gradient(90deg,transparent,transparent 7mm,rgba(255,255,255,0.07) 7mm,rgba(255,255,255,0.07) 7.5mm),
+                linear-gradient(160deg,#1e2d20,#192028);
+  }
+  .map-btn { position: absolute; background: rgba(255,255,255,0.88); border-radius: 2mm; padding: 1mm 3mm; font-size: 6px; font-weight: 600; color: #1c1c1e; }
+  .map-btn-dk { background: rgba(44,44,46,0.88); color: #f5f5f0; }
+  .m-pin { position: absolute; display: flex; flex-direction: column; align-items: center; }
+  .m-pin-dot { width: 3mm; height: 3mm; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); border: 0.5mm solid #fff; box-shadow: 0 0.5mm 2mm rgba(0,0,0,0.25); }
+  .m-pin-lbl { background: #fff; border-radius: 1.5mm; padding: 0.5mm 2mm; font-size: 5.5px; font-weight: 600; color: #1c1c1e; margin-top: 1mm; box-shadow: 0 0.5mm 2mm rgba(0,0,0,0.15); white-space: nowrap; }
+  .m-pin-lbl-dk { background: #2c2c2e; color: #f5f5f0; }
+  .num-pin { position: absolute; width: 4.5mm; height: 4.5mm; border-radius: 50%; border: 0.5mm solid #fff; display: flex; align-items: center; justify-content: center; font-size: 5.5px; font-weight: 700; color: #fff; box-shadow: 0 0.5mm 2mm rgba(0,0,0,0.3); }
+
+  /* screen body */
+  .s-body { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #f5f5f0; }
+  .phone-dark .s-body { background: #1c1c1e; }
+
+  /* header */
+  .p-hdr { padding: 2mm 3.5mm 1.5mm; background: #fff; flex-shrink: 0; }
+  .phone-dark .p-hdr { background: #1c1c1e; }
+  .p-greet { font-size: 6px; color: #8e8e93; font-weight: 500; letter-spacing: 0.3px; text-transform: uppercase; }
+  .p-title { font-size: 13px; font-weight: 700; letter-spacing: -0.3px; color: #1c1c1e; }
+  .phone-dark .p-title { color: #f5f5f0; }
+  .p-meta { font-size: 7px; color: #8e8e93; margin-top: 0.5mm; }
+
+  /* segment */
+  .seg { display: flex; background: #e5e5ea; border-radius: 2mm; margin: 1.5mm 3.5mm; padding: 0.5mm; flex-shrink: 0; }
+  .phone-dark .seg { background: #2c2c2e; }
+  .seg-btn { flex: 1; border-radius: 1.5mm; padding: 1mm 0; font-size: 6.5px; font-weight: 600; text-align: center; color: #8e8e93; }
+  .seg-btn.a { background: #fff; color: #1c1c1e; box-shadow: 0 0.3mm 1mm rgba(0,0,0,0.1); }
+  .phone-dark .seg-btn.a { background: #3a3a3c; color: #f5f5f0; }
+
+  /* trip cards in list */
+  .t-cards { flex: 1; overflow: hidden; padding: 0 3mm; display: flex; flex-direction: column; gap: 2mm; }
+  .t-card { border-radius: 4mm; overflow: hidden; box-shadow: 0 0.5mm 3mm rgba(0,0,0,0.08); flex-shrink: 0; position: relative; }
+  .t-img { height: 18mm; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+  .t-body { background: #fff; padding: 2mm 3mm; }
+  .phone-dark .t-body { background: #2c2c2e; }
+  .t-name { font-size: 8px; font-weight: 700; color: #1c1c1e; }
+  .phone-dark .t-name { color: #f5f5f0; }
+  .t-sub { font-size: 6.5px; color: #8e8e93; margin-top: 0.5mm; }
+  .t-badge { position: absolute; top: 2mm; right: 2mm; background: rgba(255,255,255,0.9); border-radius: 1.5mm; padding: 0.5mm 2mm; font-size: 6px; font-weight: 700; color: #1c1c1e; }
+  .t-badge.soon { background: rgba(52,199,89,0.9); color: #fff; }
+
+  /* fab */
+  .fab { position: absolute; bottom: 14mm; right: 3mm; width: 10mm; height: 10mm; border-radius: 5mm; background: #1c1c1e; display: flex; align-items: center; justify-content: center; font-size: 18px; color: #fff; font-weight: 300; box-shadow: 0 2mm 6mm rgba(0,0,0,0.25); }
+  .phone-dark .fab { background: #f5f5f0; color: #1c1c1e; }
+
+  /* tab bar */
+  .tab-bar { display: flex; justify-content: space-around; background: rgba(255,255,255,0.95); border-top: 0.2mm solid rgba(0,0,0,0.1); padding: 2mm 0 3mm; flex-shrink: 0; }
+  .phone-dark .tab-bar { background: rgba(28,28,30,0.95); border-color: rgba(255,255,255,0.1); }
+  .tab-i { text-align: center; }
+  .tab-ico { font-size: 11px; }
+  .tab-nm { display: block; font-size: 5.5px; margin-top: 0.5mm; color: #8e8e93; font-weight: 500; }
+  .tab-i.act .tab-nm { color: #1c1c1e; }
+  .phone-dark .tab-i.act .tab-nm { color: #f5f5f0; }
+
+  /* day strip */
+  .day-strip { display: flex; gap: 1.5mm; padding: 2mm 3.5mm; overflow: hidden; flex-shrink: 0; background: #fff; }
+  .phone-dark .day-strip { background: #1c1c1e; }
+  .d-pill { flex: 1; background: #f2f2f7; border-radius: 2mm; padding: 1mm 0; text-align: center; font-size: 5.5px; color: #8e8e93; font-weight: 500; }
+  .phone-dark .d-pill { background: #2c2c2e; }
+  .d-pill.act { background: #1c1c1e; color: #fff; }
+  .phone-dark .d-pill.act { background: #f5f5f0; color: #1c1c1e; }
+  .d-num { font-size: 7.5px; font-weight: 700; display: block; }
+
+  /* itin list */
+  .i-list { flex: 1; overflow: hidden; background: #f5f5f0; padding: 2mm 3mm 0; display: flex; flex-direction: column; gap: 1.8mm; }
+  .phone-dark .i-list { background: #1c1c1e; }
+  .i-item { display: flex; gap: 2mm; align-items: stretch; }
+  .tl-col { display: flex; flex-direction: column; align-items: center; width: 4mm; flex-shrink: 0; padding-top: 3mm; }
+  .tl-dot { width: 2.8mm; height: 2.8mm; border-radius: 50%; border: 0.5mm solid #fff; box-shadow: 0 0.3mm 1mm rgba(0,0,0,0.15); flex-shrink: 0; }
+  .tl-ln { width: 0.5mm; flex: 1; background: #e5e5ea; margin-top: 1mm; min-height: 4mm; }
+  .phone-dark .tl-ln { background: #3a3a3c; }
+  .i-card { flex: 1; background: #fff; border-radius: 3.5mm; padding: 2.5mm 3mm; box-shadow: 0 0.3mm 2mm rgba(0,0,0,0.06); display: flex; flex-direction: column; gap: 1mm; min-width: 0; }
+  .phone-dark .i-card { background: #2c2c2e; }
+  .ic-top { display: flex; align-items: center; gap: 2mm; }
+  .ic-thumb { width: 7mm; height: 7mm; border-radius: 2mm; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; box-shadow: 0 0.3mm 1mm rgba(0,0,0,0.12); }
+  .ic-name { font-size: 7.5px; font-weight: 700; color: #1c1c1e; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .phone-dark .ic-name { color: #f5f5f0; }
+  .ic-time { font-size: 6px; font-weight: 500; color: #8e8e93; flex-shrink: 0; }
+  .ic-mid { display: flex; align-items: center; gap: 1.5mm; flex-wrap: wrap; }
+  .cat-tag { display: inline-flex; align-items: center; gap: 1mm; background: #f2f2f7; border-radius: 1.5mm; padding: 0.5mm 2mm; font-size: 6px; font-weight: 600; color: #3a3a3c; flex-shrink: 0; }
+  .phone-dark .cat-tag { background: #3a3a3c; color: #aeaeb2; }
+  .ic-remark { font-size: 6px; color: #8e8e93; font-style: italic; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .ic-remark.has { color: #6e6e73; font-style: normal; }
+  .phone-dark .ic-remark.has { color: #8e8e93; }
+  .t-pill { display: inline-flex; align-items: center; gap: 1mm; border-radius: 1.5mm; padding: 0.8mm 2mm; font-size: 6px; font-weight: 700; }
+  .t-pill.wk { background: rgba(52,199,89,0.12); color: #1a7a3a; }
+  .t-pill.mt { background: rgba(0,122,255,0.1); color: #007aff; }
+  .t-pill.tx { background: rgba(255,149,0,0.12); color: #b06000; }
+  .phone-dark .t-pill.wk { color: #34c759; }
+  .phone-dark .t-pill.mt { color: #409cff; }
+  .phone-dark .t-pill.tx { color: #ff9500; }
+  .t-from { font-size: 5.5px; color: #b0b0b8; }
+
+  /* add stop / ai btn */
+  .add-stop { display: flex; align-items: center; gap: 2mm; padding: 2mm 3mm; border: 0.5mm dashed #e5e5ea; border-radius: 3.5mm; flex-shrink: 0; }
+  .phone-dark .add-stop { border-color: #3a3a3c; }
+  .add-icon { width: 7mm; height: 7mm; border-radius: 2mm; background: #f2f2f7; display: flex; align-items: center; justify-content: center; font-size: 12px; flex-shrink: 0; }
+  .phone-dark .add-icon { background: #2c2c2e; }
+  .add-txt { font-size: 7px; font-weight: 500; color: #8e8e93; }
+  .ai-btn { display: flex; align-items: center; gap: 1.5mm; background: #f0f7f0; border-radius: 2.5mm; padding: 2mm 3mm; flex-shrink: 0; margin-bottom: 2mm; border: 0.3mm solid #c5dfc5; }
+  .phone-dark .ai-btn { background: #1e2d1e; border-color: #3a5a3a; }
+  .ai-btn-t { font-size: 6.5px; font-weight: 500; color: #2d5a2d; flex: 1; }
+  .phone-dark .ai-btn-t { color: #a8c5a0; }
+
+  /* place detail */
+  .pl-hero { height: 24mm; display: flex; align-items: center; justify-content: center; font-size: 32px; position: relative; flex-shrink: 0; }
+  .pl-body { flex: 1; overflow: hidden; background: #f5f5f0; display: flex; flex-direction: column; }
+  .phone-dark .pl-body { background: #1c1c1e; }
+  .pl-sec { background: #fff; padding: 2.5mm 3.5mm; margin-bottom: 1.5mm; }
+  .phone-dark .pl-sec { background: #2c2c2e; }
+  .pl-name-row { display: flex; align-items: center; gap: 2mm; margin-bottom: 1.5mm; }
+  .pl-thumb { width: 8mm; height: 8mm; border-radius: 2mm; display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; box-shadow: 0 0.3mm 1.5mm rgba(0,0,0,0.12); }
+  .pl-name { font-size: 9px; font-weight: 700; color: #1c1c1e; }
+  .phone-dark .pl-name { color: #f5f5f0; }
+  .pl-cat { display: inline-flex; align-items: center; gap: 1mm; background: #f2f2f7; border-radius: 1.5mm; padding: 0.8mm 2.5mm; font-size: 6.5px; font-weight: 700; color: #3a3a3c; margin-bottom: 1.5mm; }
+  .phone-dark .pl-cat { background: #3a3a3c; color: #aeaeb2; }
+  .pl-remark { display: flex; align-items: flex-start; gap: 1.5mm; background: #f9f9f6; border-radius: 2mm; padding: 1.5mm 2mm; }
+  .phone-dark .pl-remark { background: #3a3a3c; }
+  .pl-remark-t { font-size: 6.5px; color: #6e6e73; line-height: 1.4; }
+  .tr-sec { background: #fff; padding: 2.5mm 3.5mm; margin-bottom: 1.5mm; }
+  .phone-dark .tr-sec { background: #2c2c2e; }
+  .tr-lbl { font-size: 6px; font-weight: 700; color: #8e8e93; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2mm; }
+  .tr-rows { display: flex; flex-direction: column; gap: 1.5mm; }
+  .tr-row { display: flex; align-items: center; gap: 2mm; background: #f9f9f6; border-radius: 2.5mm; padding: 1.5mm 2mm; }
+  .phone-dark .tr-row { background: #3a3a3c; }
+  .tr-ico { font-size: 11px; width: 5mm; text-align: center; flex-shrink: 0; }
+  .tr-mode { font-size: 7px; font-weight: 500; color: #3a3a3c; flex: 1; }
+  .phone-dark .tr-mode { color: #aeaeb2; }
+  .tr-time { font-size: 7px; font-weight: 700; color: #007aff; background: rgba(0,122,255,0.1); border-radius: 1.5mm; padding: 0.8mm 2mm; }
+  .inf-sec { background: #fff; padding: 2mm 3.5mm; }
+  .phone-dark .inf-sec { background: #2c2c2e; }
+  .inf-row { display: flex; align-items: center; gap: 2mm; padding: 1.5mm 0; border-bottom: 0.2mm solid rgba(0,0,0,0.06); font-size: 7px; color: #3a3a3c; }
+  .phone-dark .inf-row { color: #aeaeb2; border-color: rgba(255,255,255,0.07); }
+  .inf-row:last-child { border-bottom: none; }
+
+  /* explore */
+  .ex-body { flex: 1; overflow: hidden; background: #f5f5f0; display: flex; flex-direction: column; }
+  .phone-dark .ex-body { background: #1c1c1e; }
+  .search-bar { margin: 1mm 3mm 2mm; background: #f2f2f7; border-radius: 2.5mm; padding: 1.5mm 3mm; display: flex; align-items: center; gap: 2mm; font-size: 7px; color: #8e8e93; }
+  .phone-dark .search-bar { background: #2c2c2e; }
+  .cat-strip { display: flex; gap: 1.5mm; padding: 0 3mm; margin-bottom: 2mm; overflow: hidden; }
+  .c-pill { background: #f2f2f7; border-radius: 20mm; padding: 1mm 2.5mm; font-size: 6.5px; font-weight: 600; color: #3a3a3c; white-space: nowrap; flex-shrink: 0; }
+  .phone-dark .c-pill { background: #2c2c2e; color: #aeaeb2; }
+  .c-pill.act { background: #1c1c1e; color: #fff; }
+  .phone-dark .c-pill.act { background: #f5f5f0; color: #1c1c1e; }
+  .ai-banner { margin: 0 3mm 2mm; background: linear-gradient(135deg,#e8f2e8,#d8e8f0); border-radius: 3.5mm; padding: 2.5mm 3mm; display: flex; align-items: center; gap: 2mm; border: 0.3mm solid #c5dfc5; }
+  .phone-dark .ai-banner { background: linear-gradient(135deg,#1e2d1e,#1a2830); border-color: #3a5a3a; }
+  .ai-b-title { font-size: 7.5px; font-weight: 700; color: #1e4a1e; }
+  .phone-dark .ai-b-title { color: #a8c5a0; }
+  .ai-b-sub { font-size: 6px; color: #4a7a4a; }
+  .phone-dark .ai-b-sub { color: #6a9a6a; }
+  .dest-cards { display: flex; flex-direction: column; gap: 1.5mm; padding: 0 3mm; overflow: hidden; }
+  .dest-card { border-radius: 3.5mm; overflow: hidden; box-shadow: 0 0.5mm 2mm rgba(0,0,0,0.07); flex-shrink: 0; display: flex; background: #fff; }
+  .phone-dark .dest-card { background: #2c2c2e; }
+  .dest-img { width: 16mm; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .dest-info { padding: 2mm 2.5mm; flex: 1; }
+  .dest-name { font-size: 8px; font-weight: 700; color: #1c1c1e; margin-bottom: 0.5mm; }
+  .phone-dark .dest-name { color: #f5f5f0; }
+  .dest-meta { font-size: 6px; color: #8e8e93; }
+  .dest-tag { font-size: 6px; font-weight: 600; background: #f2f2f7; border-radius: 1mm; padding: 0.5mm 2mm; color: #3a3a3c; display: inline-block; margin-top: 1mm; }
+  .phone-dark .dest-tag { background: #3a3a3c; color: #aeaeb2; }
+
+  /* create trip flow */
+  .flow-phones { display: flex; gap: 5mm; justify-content: center; flex-wrap: wrap; align-items: flex-start; }
+  .p-sm { width: 50mm; border-radius: 10mm; background: #fff; border: 1.5mm solid #1c1c1e; box-shadow: 0 4mm 12mm rgba(0,0,0,0.15); overflow: hidden; display: flex; flex-direction: column; }
+  .p-sm-dk { background: #1c1c1e; border-color: #2c2c2e; }
+  .nb-sm { background: #1c1c1e; height: 6mm; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .p-sm-dk .nb-sm { background: #000; }
+  .nt-sm { width: 16mm; height: 4mm; background: #1c1c1e; border-radius: 0 0 3mm 3mm; }
+  .p-sm-dk .nt-sm { background: #000; }
+  .sm-hdr { padding: 2mm 3mm 1mm; }
+  .sm-back { font-size: 5.5px; color: #007aff; margin-bottom: 1mm; }
+  .sm-title { font-size: 10px; font-weight: 700; color: #1c1c1e; }
+  .p-sm-dk .sm-title { color: #f5f5f0; }
+  .sm-sub { font-size: 6px; color: #8e8e93; margin-top: 0.5mm; }
+  .field { padding: 0 3mm; margin-bottom: 2mm; }
+  .f-lbl { font-size: 5.5px; font-weight: 700; color: #8e8e93; letter-spacing: 0.3px; text-transform: uppercase; margin-bottom: 1mm; }
+  .f-inp { background: #f2f2f7; border-radius: 2.5mm; padding: 1.5mm 2.5mm; font-size: 7px; color: #1c1c1e; display: flex; align-items: center; gap: 1.5mm; }
+  .p-sm-dk .f-inp { background: #2c2c2e; color: #f5f5f0; }
+  .f-inp.filled { background: #fff; border: 0.5mm solid #e5e5ea; }
+  .p-sm-dk .f-inp.filled { background: #3a3a3c; border-color: #48484a; }
+  .f-ph { color: #8e8e93; }
+  .date-row { display: flex; gap: 2mm; padding: 0 3mm; margin-bottom: 2mm; }
+  .date-b { flex: 1; background: #f2f2f7; border-radius: 2.5mm; padding: 1.5mm 2.5mm; }
+  .p-sm-dk .date-b { background: #2c2c2e; }
+  .date-lbl { font-size: 5px; font-weight: 700; color: #8e8e93; text-transform: uppercase; }
+  .date-v { font-size: 7.5px; font-weight: 700; color: #1c1c1e; margin-top: 0.5mm; }
+  .p-sm-dk .date-v { color: #f5f5f0; }
+  .date-v.ph { color: #8e8e93; font-weight: 400; }
+  .chips { display: flex; flex-wrap: wrap; gap: 1.5mm; padding: 0 3mm; margin-bottom: 2mm; }
+  .chip { background: #f2f2f7; border-radius: 20mm; padding: 1mm 2.5mm; font-size: 6px; font-weight: 600; color: #3a3a3c; }
+  .p-sm-dk .chip { background: #2c2c2e; color: #aeaeb2; }
+  .chip.sel { background: #1c1c1e; color: #fff; }
+  .p-sm-dk .chip.sel { background: #f5f5f0; color: #1c1c1e; }
+  .act-btn { margin: 0 3mm 2mm; background: #1c1c1e; border-radius: 3mm; padding: 2.5mm; text-align: center; font-size: 7.5px; font-weight: 700; color: #fff; }
+  .p-sm-dk .act-btn { background: #f5f5f0; color: #1c1c1e; }
+  /* fab sheet */
+  .sheet-bk { flex: 1; background: rgba(0,0,0,0.08); display: flex; flex-direction: column; justify-content: flex-end; }
+  .p-sm-dk .sheet-bk { background: rgba(0,0,0,0.4); }
+  .b-sheet { background: #fff; border-radius: 4mm 4mm 0 0; padding: 2.5mm 3mm 3mm; }
+  .p-sm-dk .b-sheet { background: #2c2c2e; }
+  .drag-h { width: 10mm; height: 1mm; background: #c7c7cc; border-radius: 0.5mm; margin: 0 auto 2mm; }
+  .sheet-ttl { font-size: 8px; font-weight: 700; color: #1c1c1e; text-align: center; margin-bottom: 0.5mm; }
+  .p-sm-dk .sheet-ttl { color: #f5f5f0; }
+  .sheet-cap { font-size: 6px; color: #8e8e93; text-align: center; margin-bottom: 2mm; }
+  .c-opt { border-radius: 3mm; padding: 2mm 2.5mm; margin-bottom: 1.5mm; display: flex; align-items: center; gap: 2mm; border: 0.5mm solid #e5e5ea; background: #fff; }
+  .p-sm-dk .c-opt { background: #3a3a3c; border-color: #48484a; }
+  .c-opt.ai { border-color: #a8c5a0; background: #f0f7f0; }
+  .p-sm-dk .c-opt.ai { background: #1e2d1e; border-color: #4a7a4a; }
+  .opt-ico { font-size: 14px; flex-shrink: 0; width: 6mm; text-align: center; }
+  .opt-ttl { font-size: 7px; font-weight: 700; color: #1c1c1e; margin-bottom: 0.5mm; }
+  .p-sm-dk .opt-ttl { color: #f5f5f0; }
+  .opt-ttl.grn { color: #1e4a1e; }
+  .p-sm-dk .opt-ttl.grn { color: #a8c5a0; }
+  .opt-sub { font-size: 5.5px; color: #8e8e93; }
+  /* shimmer */
+  .shimmer { height: 3.5mm; border-radius: 1.5mm; background: linear-gradient(90deg,#f2f2f7,#e5e5ea,#f2f2f7); margin-bottom: 2mm; }
+  .p-sm-dk .shimmer { background: linear-gradient(90deg,#2c2c2e,#3a3a3c,#2c2c2e); }
+  .gen-stop { display: flex; align-items: center; gap: 1.5mm; padding: 1.5mm 3mm; border-bottom: 0.2mm solid rgba(0,0,0,0.05); }
+  .p-sm-dk .gen-stop { border-color: rgba(255,255,255,0.05); }
+  .g-dot { width: 2mm; height: 2mm; border-radius: 50%; flex-shrink: 0; }
+  .g-thumb { width: 6mm; height: 6mm; border-radius: 1.5mm; display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; }
+  .g-txt { font-size: 6.5px; color: #1c1c1e; flex: 1; }
+  .p-sm-dk .g-txt { color: #f5f5f0; }
+  .g-time { font-size: 5.5px; color: #8e8e93; }
+  .ai-gen-lbl { font-size: 6.5px; color: #a8c5a0; font-weight: 700; text-align: center; padding: 1.5mm 0 1mm; letter-spacing: 0.3px; }
+
+  /* ── ARCHITECTURE PAGE ── */
+  .arch-grid { display: flex; flex-direction: column; gap: 4mm; }
+  .arch-layer { background: #f9f9f6; border-radius: 4mm; padding: 4mm 5mm; border-left: 2mm solid #1c1c1e; }
+  .arch-layer.green { border-color: #a8c5a0; }
+  .arch-layer.blue { border-color: #b8ccd8; }
+  .arch-layer.amber { border-color: #d4c4a8; }
+  .arch-l-title { font-size: 10px; font-weight: 700; color: #1c1c1e; margin-bottom: 2mm; }
+  .arch-cols { display: flex; flex-wrap: wrap; gap: 3mm; }
+  .arch-box { background: #fff; border-radius: 2.5mm; padding: 2.5mm 3.5mm; box-shadow: 0 0.3mm 2mm rgba(0,0,0,0.06); min-width: 35mm; }
+  .arch-box-title { font-size: 8.5px; font-weight: 700; color: #1c1c1e; margin-bottom: 1mm; }
+  .arch-box-items { font-size: 7px; color: #6e6e73; line-height: 1.6; font-family: 'Courier New', monospace; }
+  .flow-diagram { display: flex; align-items: center; gap: 3mm; flex-wrap: wrap; margin-top: 4mm; }
+  .flow-node { background: #fff; border: 0.5mm solid #e5e5ea; border-radius: 2.5mm; padding: 1.5mm 3mm; font-size: 8px; font-weight: 600; color: #1c1c1e; white-space: nowrap; }
+  .flow-node.dark { background: #1c1c1e; color: #f5f5f0; border-color: #1c1c1e; }
+  .flow-node.sage { background: #e8f2e8; color: #1e4a1e; border-color: #c5dfc5; }
+  .flow-node.slate { background: #e4eef5; color: #1a3a54; border-color: #b8ccd8; }
+  .flow-arrow { font-size: 12px; color: #c7c7cc; }
+
+  /* ── SCHEMA PAGE ── */
+  .schema-row { display: flex; gap: 4mm; flex-wrap: wrap; }
+  .tbl { background: #f9f9f6; border-radius: 3.5mm; overflow: hidden; min-width: 38mm; flex: 1; border: 0.3mm solid #e5e5ea; }
+  .tbl-hdr { padding: 2mm 3mm; font-size: 8px; font-weight: 700; color: #fff; }
+  .th-ink { background: #1c1c1e; }
+  .th-green { background: #1e4a1e; }
+  .th-blue { background: #1a3a54; }
+  .th-amber { background: #6a3a00; }
+  .th-purple { background: #3a1a54; }
+  .th-slate { background: #1a2a3a; }
+  .col-r { display: flex; align-items: center; padding: 1.5mm 3mm; border-bottom: 0.2mm solid #e5e5ea; font-size: 7px; }
+  .col-r:last-child { border-bottom: none; }
+  .col-n { font-weight: 600; color: #1c1c1e; flex: 1; }
+  .col-t { color: #8e8e93; font-size: 6px; font-style: italic; }
+  .badge-pk { background: #ff9500; color: #fff; font-size: 5.5px; font-weight: 700; border-radius: 1mm; padding: 0.3mm 1.5mm; margin-right: 1.5mm; flex-shrink: 0; }
+  .badge-fk { background: #007aff; color: #fff; font-size: 5.5px; font-weight: 700; border-radius: 1mm; padding: 0.3mm 1.5mm; margin-right: 1.5mm; flex-shrink: 0; }
+  .rel-row { display: flex; align-items: center; gap: 2mm; font-size: 8px; margin-bottom: 1.5mm; }
+  .rel-f { font-weight: 600; background: #f2f2f7; border-radius: 1.5mm; padding: 0.8mm 2.5mm; color: #1c1c1e; }
+  .rel-ar { color: #8e8e93; font-size: 11px; }
+  .rel-c { color: #8e8e93; font-size: 7.5px; font-style: italic; }
+
+  /* ── SERVICES PAGE ── */
+  .svc-list { display: flex; flex-direction: column; gap: 3mm; }
+  .svc-row { display: flex; align-items: stretch; background: #f9f9f6; border-radius: 3.5mm; overflow: hidden; }
+  .svc-badge { width: 24mm; flex-shrink: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 3mm 2mm; font-size: 7.5px; font-weight: 700; text-align: center; gap: 1.5mm; line-height: 1.3; }
+  .sb-sup { background: #1e3a2a; color: #a8e0b8; }
+  .sb-oai { background: #1a2a3a; color: #a8c8e8; }
+  .sb-gm { background: #3a1e00; color: #e8c878; }
+  .sb-fb { background: #3a1a00; color: #e8a878; }
+  .sb-loc { background: #2a1a3a; color: #c8a8e8; }
+  .svc-detail { flex: 1; padding: 3mm 4mm; }
+  .svc-title { font-size: 9px; font-weight: 700; color: #1c1c1e; margin-bottom: 1mm; }
+  .svc-desc { font-size: 7.5px; color: #6e6e73; line-height: 1.5; margin-bottom: 1.5mm; }
+  .svc-calls { display: flex; flex-wrap: wrap; gap: 1.5mm; }
+  .svc-call { background: #fff; border: 0.3mm solid #e5e5ea; border-radius: 1.5mm; padding: 0.8mm 2mm; font-size: 6.5px; font-weight: 500; color: #3a3a3c; font-family: 'Courier New', monospace; }
+
+  /* ── ERROR + TESTING ── */
+  .err-table { width: 100%; border-collapse: collapse; margin-top: 2mm; font-size: 7.5px; }
+  .err-table th { text-align: left; font-size: 6.5px; font-weight: 700; color: #8e8e93; letter-spacing: 0.5px; text-transform: uppercase; padding: 0 0 2mm; border-bottom: 0.5mm solid #e5e5ea; }
+  .err-table td { padding: 2mm 0; vertical-align: top; border-bottom: 0.2mm solid #f2f2f7; line-height: 1.4; color: #3a3a3c; }
+  .err-table tr:last-child td { border-bottom: none; }
+  .err-table td:first-child { font-weight: 600; color: #1c1c1e; width: 35%; padding-right: 4mm; }
+  .e-tag { display: inline-block; border-radius: 1mm; padding: 0.5mm 2mm; font-size: 6px; font-weight: 700; margin-right: 1.5mm; }
+  .e-off { background: #fff3e0; color: #7a4000; }
+  .e-api { background: #ffeaea; color: #7a0000; }
+  .e-usr { background: #e8f0ff; color: #003a7a; }
+  .test-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3mm; margin-top: 2mm; }
+  .test-card { background: #f9f9f6; border-radius: 3mm; padding: 3mm 4mm; }
+  .test-lyr { font-size: 7px; font-weight: 700; color: #8e8e93; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 2mm; }
+  .test-item { display: flex; align-items: flex-start; gap: 1.5mm; font-size: 7.5px; color: #3a3a3c; line-height: 1.4; margin-bottom: 1.5mm; }
+  .test-dot { width: 1.5mm; height: 1.5mm; border-radius: 50%; background: #1c1c1e; margin-top: 1.5mm; flex-shrink: 0; }
+
+  /* palette / type */
+  .palette-row { display: flex; gap: 3mm; flex-wrap: wrap; margin-top: 2mm; }
+  .sw-grp { display: flex; flex-direction: column; align-items: center; gap: 1.5mm; }
+  .sw { width: 14mm; height: 14mm; border-radius: 3mm; box-shadow: 0 0.5mm 3mm rgba(0,0,0,0.12); }
+  .sw-lbl { font-size: 6.5px; color: #6e6e73; text-align: center; font-weight: 500; line-height: 1.3; }
+  .type-row { display: flex; flex-direction: column; gap: 2mm; margin-top: 3mm; }
+  .type-spec { display: flex; align-items: baseline; gap: 4mm; }
+  .type-role { font-size: 7px; color: #8e8e93; width: 20mm; flex-shrink: 0; font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════
+     PAGE 1 — COVER
+════════════════════════════════════════════════ -->
+<div class="page cover">
+  <div class="cover-top">
+    <div class="cover-tag">System Design · 2026</div>
+    <div class="cover-title">Smart Travel<br><strong>Planner</strong></div>
+    <div class="cover-sub">Mobile application system design — architecture, screen design, data model, services, and interaction patterns for a cross-platform iOS &amp; Android travel planning experience.</div>
+  </div>
+
+  <!-- cover phones -->
+  <div class="cover-phones">
+    <!-- Phone A: Trip List -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2mm;">
+      <div style="font-size:7px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:#48484a;">Trips — Home</div>
+      <div class="phone" style="width:55mm;">
+        <div class="notch-bar"><div class="notch"></div></div>
+        <div class="s-body" style="background:#f5f5f0;">
+          <div class="p-status"><span>9:41</span><span>●●●</span></div>
+          <div class="p-hdr"><div class="p-greet">Good morning</div><div class="p-title">My Trips</div></div>
+          <div class="seg"><div class="seg-btn a">Upcoming</div><div class="seg-btn">Past</div><div class="seg-btn">Drafts</div></div>
+          <div class="t-cards">
+            <div class="t-card"><div class="t-img" style="background:linear-gradient(135deg,#dde8d8,#b8d4c8);">🗼</div><div class="t-badge soon">In 4 days</div><div class="t-body"><div class="t-name">Paris, France</div><div class="t-sub">Jun 12–18 · 6 days · 8 stops</div></div></div>
+            <div class="t-card"><div class="t-img" style="background:linear-gradient(135deg,#e8e4d8,#d4c8b8);">⛩️</div><div class="t-badge">Aug 2</div><div class="t-body"><div class="t-name">Kyoto, Japan</div><div class="t-sub">Aug 2–10 · 8 days</div></div></div>
+            <div class="t-card" style="opacity:0.5;"><div class="t-img" style="background:linear-gradient(135deg,#d8e0e8,#b8c8d8);">🏔️</div><div class="t-badge" style="background:rgba(142,142,147,0.7);color:#fff;">Draft</div><div class="t-body"><div class="t-name">Swiss Alps</div><div class="t-sub">No dates · 5 stops</div></div></div>
+          </div>
+          <div class="fab" style="position:relative;align-self:flex-end;margin:2mm 3mm 2mm auto;">＋</div>
+        </div>
+        <div class="tab-bar"><div class="tab-i act"><div class="tab-ico">✈️</div><span class="tab-nm">Trips</span></div><div class="tab-i"><div class="tab-ico">✦</div><span class="tab-nm">Explore</span></div><div class="tab-i"><div class="tab-ico">◯</div><span class="tab-nm">Profile</span></div></div>
+      </div>
+    </div>
+    <!-- Phone B: Trip Detail dark -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2mm;">
+      <div style="font-size:7px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:#48484a;">Trip Detail — Dark</div>
+      <div class="phone phone-dark" style="width:55mm;">
+        <div class="notch-bar"><div class="notch"></div></div>
+        <div class="map-h map-h-dark" style="position:relative;">
+          <div class="map-btn map-btn-dk" style="top:2mm;left:2.5mm;">← Trips</div>
+          <div class="map-btn map-btn-dk" style="bottom:2mm;right:2.5mm;">Expand ↗</div>
+          <div class="num-pin" style="background:#34c759;top:8mm;left:35%;">1</div>
+          <div class="num-pin" style="background:#007aff;top:14mm;left:55%;">2</div>
+          <div class="num-pin" style="background:#ff9500;top:6mm;left:68%;">3</div>
+        </div>
+        <div class="p-status" style="color:#636366;"><span>9:41</span><span>●●●</span></div>
+        <div class="p-hdr"><div class="p-title">Paris, France</div><div class="p-meta">Jun 12–18 · 6 days</div></div>
+        <div class="day-strip"><div class="d-pill"><span class="d-num">12</span>Thu</div><div class="d-pill act"><span class="d-num">13</span>Fri</div><div class="d-pill"><span class="d-num">14</span>Sat</div><div class="d-pill"><span class="d-num">15</span>Sun</div></div>
+        <div class="i-list">
+          <div class="i-item"><div class="tl-col"><div class="tl-dot" style="background:#34c759;"></div><div class="tl-ln"></div></div><div class="i-card"><div class="ic-top"><div class="ic-thumb" style="background:linear-gradient(135deg,#1e2d20,#162820);">🗼</div><div class="ic-name">Eiffel Tower</div><div class="ic-time">9:00 AM</div></div><div class="ic-mid"><div class="cat-tag">🏛️ Landmark</div><div class="ic-remark has">Book tickets 2 days early</div></div><div style="display:flex;align-items:center;gap:1.5mm;"><div class="t-pill wk">🚶 18 min</div><div class="t-from">from hotel</div></div></div></div>
+          <div class="i-item"><div class="tl-col"><div class="tl-dot" style="background:#007aff;"></div><div class="tl-ln"></div></div><div class="i-card"><div class="ic-top"><div class="ic-thumb" style="background:linear-gradient(135deg,#2d2a1e,#22201a);">☕</div><div class="ic-name">Café de Flore</div><div class="ic-time">12:30 PM</div></div><div class="ic-mid"><div class="cat-tag">🍽️ Restaurant</div><div class="ic-remark" style="color:#48484a;font-style:italic;">Add remark…</div></div><div style="display:flex;align-items:center;gap:1.5mm;"><div class="t-pill mt">🚇 8 min</div><div class="t-from">from Eiffel Tower</div></div></div></div>
+          <div class="i-item"><div class="tl-col"><div class="tl-dot" style="background:#ff9500;"></div></div><div class="i-card"><div class="ic-top"><div class="ic-thumb" style="background:linear-gradient(135deg,#2d201e,#221816);">🎨</div><div class="ic-name">Musée d'Orsay</div><div class="ic-time">3:00 PM</div></div><div class="ic-mid"><div class="cat-tag">🏛️ Museum</div><div class="ic-remark has">Closed Mondays</div></div><div style="display:flex;align-items:center;gap:1.5mm;"><div class="t-pill mt">🚇 5 min</div><div class="t-from">from Café de Flore</div></div></div></div>
+          <div class="ai-btn"><div style="font-size:8px;">✦</div><div class="ai-btn-t">Suggest more stops for Friday</div></div>
+        </div>
+        <div class="tab-bar" style="background:rgba(28,28,30,0.95);border-color:rgba(255,255,255,0.1);"><div class="tab-i act"><div class="tab-ico">✈️</div><span class="tab-nm" style="color:#f5f5f0;">Trips</span></div><div class="tab-i"><div class="tab-ico">✦</div><span class="tab-nm">Explore</span></div><div class="tab-i"><div class="tab-ico">◯</div><span class="tab-nm">Profile</span></div></div>
+      </div>
+    </div>
+    <!-- Phone C: Place Detail -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2mm;">
+      <div style="font-size:7px;font-weight:700;letter-spacing:0.6px;text-transform:uppercase;color:#48484a;">Place Detail</div>
+      <div class="phone" style="width:55mm;">
+        <div class="notch-bar"><div class="notch"></div></div>
+        <div class="pl-hero" style="background:linear-gradient(160deg,#dde8d8,#c8d8e8);">🗼<div class="map-btn" style="top:2mm;left:2.5mm;">← Back</div><div class="map-btn" style="top:2mm;right:2.5mm;">♡</div></div>
+        <div class="pl-body">
+          <div class="pl-sec">
+            <div class="pl-name-row"><div class="pl-thumb" style="background:linear-gradient(135deg,#dde8d8,#b8d4c8);">🗼</div><div class="pl-name">Eiffel Tower</div></div>
+            <div class="pl-cat">🏛️ Landmark</div>
+            <div class="pl-remark"><span style="font-size:8px;color:#8e8e93;margin-right:1mm;">✎</span><div class="pl-remark-t">Book tickets 2 days early. Skip summit in winter.</div></div>
+          </div>
+          <div class="tr-sec">
+            <div class="tr-lbl">Getting There</div>
+            <div class="tr-rows">
+              <div class="tr-row"><div class="tr-ico">🚶</div><div class="tr-mode">Walk</div><div class="tr-time">18 min</div></div>
+              <div class="tr-row"><div class="tr-ico">🚇</div><div class="tr-mode">Metro · Line 6</div><div class="tr-time">8 min</div></div>
+              <div class="tr-row"><div class="tr-ico">🚕</div><div class="tr-mode">Taxi / Ride</div><div class="tr-time">6 min</div></div>
+            </div>
+          </div>
+          <div class="inf-sec">
+            <div class="inf-row">🕙&nbsp; Open: 9:00 AM – 11:45 PM</div>
+            <div class="inf-row">⭐&nbsp; 4.7 · 284k reviews</div>
+            <div class="inf-row">🎟️&nbsp; From €18 · Book in advance</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div>
+    <div class="cover-stack">
+      <div class="stack-pill">React Native + Expo</div>
+      <div class="stack-pill">TypeScript</div>
+      <div class="stack-pill">Supabase + PostgreSQL</div>
+      <div class="stack-pill">Google Maps API</div>
+      <div class="stack-pill">OpenAI GPT-4o</div>
+      <div class="stack-pill">Zustand</div>
+      <div class="stack-pill">Firebase FCM</div>
+    </div>
+    <div class="cover-meta" style="margin-top:4mm;">Smart Travel Planner · System Design Document · May 2026</div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     PAGE 2 — DESIGN LANGUAGE + IA
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-label">Section 01</div>
+  <div class="section-title">Design Language</div>
+  <div class="section-sub">Neo-minimalism + Apple-inspired. Earthy calm palette, system typography, spring-curve animations, frosted glass surfaces.</div>
+
+  <div style="display:flex;gap:8mm;align-items:flex-start;">
+    <div style="flex:1;">
+      <div style="font-size:8px;font-weight:700;color:#8e8e93;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:3mm;">Colour Palette</div>
+      <div class="palette-row">
+        <div class="sw-grp"><div class="sw" style="background:#1c1c1e;"></div><div class="sw-lbl">Ink<br>#1c1c1e</div></div>
+        <div class="sw-grp"><div class="sw" style="background:#f5f5f0;border:0.3mm solid #e5e5ea;"></div><div class="sw-lbl">Parchment<br>#f5f5f0</div></div>
+        <div class="sw-grp"><div class="sw" style="background:#a8c5a0;"></div><div class="sw-lbl">Sage<br>#a8c5a0</div></div>
+        <div class="sw-grp"><div class="sw" style="background:#b8ccd8;"></div><div class="sw-lbl">Slate<br>#b8ccd8</div></div>
+        <div class="sw-grp"><div class="sw" style="background:#d4c4a8;"></div><div class="sw-lbl">Stone<br>#d4c4a8</div></div>
+        <div class="sw-grp"><div class="sw" style="background:#8e8e93;"></div><div class="sw-lbl">Mist<br>#8e8e93</div></div>
+      </div>
+      <div style="margin-top:4mm;">
+        <div style="font-size:8px;font-weight:700;color:#8e8e93;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:3mm;">Typography Scale</div>
+        <div class="type-row">
+          <div class="type-spec"><div class="type-role">Display</div><div style="font-size:24px;font-weight:200;letter-spacing:-1px;color:#1c1c1e;line-height:1;">Paris</div></div>
+          <div class="type-spec"><div class="type-role">Title</div><div style="font-size:17px;font-weight:600;letter-spacing:-0.3px;color:#1c1c1e;">My Trips</div></div>
+          <div class="type-spec"><div class="type-role">Body</div><div style="font-size:12px;font-weight:400;color:#3a3a3c;">Jun 12–18 · 6 days</div></div>
+          <div class="type-spec"><div class="type-role">Label</div><div style="font-size:9px;font-weight:600;color:#8e8e93;text-transform:uppercase;letter-spacing:0.5px;">Upcoming Trip</div></div>
+          <div class="type-spec"><div class="type-role">Caption</div><div style="font-size:7px;font-weight:700;color:#007aff;background:rgba(0,122,255,0.1);padding:1mm 3mm;border-radius:1.5mm;">🚶 18 min</div></div>
+        </div>
+      </div>
+    </div>
+    <div style="flex:1;">
+      <div style="font-size:8px;font-weight:700;color:#8e8e93;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:3mm;">Gesture System</div>
+      <div style="display:flex;flex-direction:column;gap:2mm;">
+        <div style="background:#f9f9f6;border-radius:3mm;padding:2.5mm 3mm;display:flex;align-items:flex-start;gap:2.5mm;"><div style="font-size:14px;width:6mm;text-align:center;flex-shrink:0;">↕</div><div><div style="font-size:8px;font-weight:700;color:#1c1c1e;margin-bottom:1mm;">Sheet drag</div><div style="font-size:7px;color:#6e6e73;line-height:1.4;">Snap points at 30% / 60% / 95% of screen height</div></div></div>
+        <div style="background:#f9f9f6;border-radius:3mm;padding:2.5mm 3mm;display:flex;align-items:flex-start;gap:2.5mm;"><div style="font-size:14px;width:6mm;text-align:center;flex-shrink:0;">←</div><div><div style="font-size:8px;font-weight:700;color:#1c1c1e;margin-bottom:1mm;">Card swipe left</div><div style="font-size:7px;color:#6e6e73;line-height:1.4;">Reveals Delete / Archive; spring-back on cancel</div></div></div>
+        <div style="background:#f9f9f6;border-radius:3mm;padding:2.5mm 3mm;display:flex;align-items:flex-start;gap:2.5mm;"><div style="font-size:14px;width:6mm;text-align:center;flex-shrink:0;">☰</div><div><div style="font-size:8px;font-weight:700;color:#1c1c1e;margin-bottom:1mm;">Long-press drag</div><div style="font-size:7px;color:#6e6e73;line-height:1.4;">Lift stop card; haptic on pickup; spring settle on drop</div></div></div>
+        <div style="background:#f9f9f6;border-radius:3mm;padding:2.5mm 3mm;display:flex;align-items:flex-start;gap:2.5mm;"><div style="font-size:14px;width:6mm;text-align:center;flex-shrink:0;">⊕</div><div><div style="font-size:8px;font-weight:700;color:#1c1c1e;margin-bottom:1mm;">Pinch map</div><div style="font-size:7px;color:#6e6e73;line-height:1.4;">Native Google Maps zoom; pins cluster at low zoom</div></div></div>
+        <div style="background:#f9f9f6;border-radius:3mm;padding:2.5mm 3mm;display:flex;align-items:flex-start;gap:2.5mm;"><div style="font-size:14px;width:6mm;text-align:center;flex-shrink:0;">↔</div><div><div style="font-size:8px;font-weight:700;color:#1c1c1e;margin-bottom:1mm;">Day strip scroll</div><div style="font-size:7px;color:#6e6e73;line-height:1.4;">Horizontal snapping; selected pill auto-centres</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-label" style="margin-top:4mm;">Section 02</div>
+  <div class="section-title">Information Architecture</div>
+  <div class="section-sub">3-tab shell. Map lives inside Trip Detail — not a standalone tab. Onboarding gate before main app.</div>
+  <div style="background:#f9f9f6;border-radius:4mm;padding:4mm 5mm;font-family:'Courier New',monospace;font-size:8px;color:#3a3a3c;line-height:1.9;">
+    <span style="color:#1c1c1e;font-weight:700;">App</span><br>
+    ├── <span style="color:#6e6e73;">Onboarding / Auth</span> — Welcome slides · Sign In / Sign Up · Supabase Auth<br>
+    ├── <span style="font-weight:700;">✈️ Trips</span> (home tab)<br>
+    │&nbsp;&nbsp;&nbsp;├── Trip List — Upcoming / Past / Drafts · FAB (+)<br>
+    │&nbsp;&nbsp;&nbsp;├── Create Trip — <span style="color:#1e4a1e;font-weight:700;">Manual</span> (form) | <span style="color:#1a3a54;font-weight:700;">AI Generate</span> (style + pace → stream → refine)<br>
+    │&nbsp;&nbsp;&nbsp;└── Trip Detail — Map hero · Day strip · <span style="font-weight:700;">Activity list (stop cards)</span> · Add stop · ✦ AI suggest<br>
+    │&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Place Detail — Hero · Name+icon · Category · Remark · Transport · Info<br>
+    ├── <span style="font-weight:700;">✦ Explore</span> — Search · Category filter · AI Generate banner · Destination cards<br>
+    └── <span style="font-weight:700;">◯ Profile</span> — Settings · Saved Places · Offline Trips
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     PAGE 3 — EXPLORE + CREATE TRIP FLOW
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-label">Section 03</div>
+  <div class="section-title">Create Trip Flow &amp; Explore Screen</div>
+  <div class="section-sub">FAB opens a dual-path sheet. AI path streams itinerary staggered by day. Explore tab has category filters and an AI Generate banner.</div>
+
+  <div class="flow-phones">
+    <!-- 1 FAB sheet -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2mm;">
+      <div style="font-size:7px;font-weight:700;color:#8e8e93;letter-spacing:0.5px;text-transform:uppercase;">① Choose Path</div>
+      <div class="p-sm">
+        <div class="nb-sm"><div class="nt-sm"></div></div>
+        <div style="flex:1;display:flex;flex-direction:column;background:#f5f5f0;">
+          <div style="padding:2mm 3mm;opacity:0.25;"><div style="height:8mm;background:#e5e5ea;border-radius:2.5mm;margin-bottom:1.5mm;"></div><div style="height:8mm;background:#e5e5ea;border-radius:2.5mm;"></div></div>
+          <div class="sheet-bk">
+            <div class="b-sheet"><div class="drag-h"></div><div class="sheet-ttl">New Trip</div><div class="sheet-cap">How would you like to start?</div><div class="c-opt"><div class="opt-ico">📝</div><div><div class="opt-ttl">Build manually</div><div class="opt-sub">Add destination and stops yourself</div></div></div><div class="c-opt ai"><div class="opt-ico">✦</div><div><div class="opt-ttl grn">Generate with AI</div><div class="opt-sub">Tell us your style</div></div></div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- 2 Manual -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2mm;">
+      <div style="font-size:7px;font-weight:700;color:#8e8e93;letter-spacing:0.5px;text-transform:uppercase;">② Manual</div>
+      <div class="p-sm">
+        <div class="nb-sm"><div class="nt-sm"></div></div>
+        <div style="flex:1;display:flex;flex-direction:column;background:#f5f5f0;">
+          <div class="sm-hdr"><div class="sm-back">← Back</div><div class="sm-title">Trip Details</div></div>
+          <div style="height:2mm;"></div>
+          <div class="field"><div class="f-lbl">Destination</div><div class="f-inp filled"><span>📍</span>Paris, France</div></div>
+          <div class="field"><div class="f-lbl">Trip Name</div><div class="f-inp"><div class="f-ph">e.g. Summer in Paris</div></div></div>
+          <div class="date-row"><div class="date-b"><div class="date-lbl">From</div><div class="date-v">Jun 12</div></div><div class="date-b"><div class="date-lbl">To</div><div class="date-v ph">Select</div></div></div>
+          <div class="field"><div class="f-lbl">Travellers</div><div class="f-inp"><span>👤</span> Solo</div></div>
+          <div class="act-btn">Create Trip →</div>
+        </div>
+      </div>
+    </div>
+    <!-- 3 AI prefs -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2mm;">
+      <div style="font-size:7px;font-weight:700;color:#8e8e93;letter-spacing:0.5px;text-transform:uppercase;">③ AI Prefs</div>
+      <div class="p-sm p-sm-dk">
+        <div class="nb-sm"><div class="nt-sm"></div></div>
+        <div style="flex:1;display:flex;flex-direction:column;background:#1c1c1e;">
+          <div class="sm-hdr"><div class="sm-back" style="color:#a8c5a0;">← Back</div><div class="sm-title">Plan with AI</div></div>
+          <div style="height:1.5mm;"></div>
+          <div class="field"><div class="f-lbl">Destination</div><div class="f-inp filled"><span>📍</span>Kyoto, Japan</div></div>
+          <div class="date-row"><div class="date-b"><div class="date-lbl">Duration</div><div class="date-v">7 days</div></div><div class="date-b"><div class="date-lbl">Travellers</div><div class="date-v">2</div></div></div>
+          <div class="field"><div class="f-lbl">Style</div></div>
+          <div class="chips"><div class="chip sel">🌿 Calm</div><div class="chip sel">🏛️ Culture</div><div class="chip">🍜 Food</div><div class="chip">🛍️ Shop</div></div>
+          <div class="field"><div class="f-lbl">Pace</div></div>
+          <div class="chips"><div class="chip">Relaxed</div><div class="chip sel">Balanced</div><div class="chip">Packed</div></div>
+          <div class="act-btn">Generate ✦</div>
+        </div>
+      </div>
+    </div>
+    <!-- 4 Generating -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2mm;">
+      <div style="font-size:7px;font-weight:700;color:#8e8e93;letter-spacing:0.5px;text-transform:uppercase;">④ Generating</div>
+      <div class="p-sm p-sm-dk">
+        <div class="nb-sm"><div class="nt-sm"></div></div>
+        <div style="flex:1;display:flex;flex-direction:column;background:#1c1c1e;">
+          <div class="sm-hdr"><div class="sm-title">Kyoto, Japan</div><div class="sm-sub" style="color:#a8c5a0;">✦ Building your plan…</div></div>
+          <div style="padding:0 3mm;margin-bottom:2mm;"><div style="font-size:6.5px;font-weight:700;color:#a8c5a0;letter-spacing:0.5px;margin-bottom:1.5mm;">DAY 1 — THURSDAY</div><div class="gen-stop"><div class="g-dot" style="background:#34c759;"></div><div class="g-thumb" style="background:#1e2d20;">⛩️</div><div class="g-txt">Fushimi Inari</div><div class="g-time">9 AM</div></div><div class="gen-stop"><div class="g-dot" style="background:#007aff;"></div><div class="g-thumb" style="background:#1a2030;">🍜</div><div class="g-txt">Nishiki Market</div><div class="g-time">12 PM</div></div></div>
+          <div style="padding:0 3mm;"><div style="font-size:6.5px;font-weight:700;color:#636366;letter-spacing:0.5px;margin-bottom:2mm;">DAY 2 — FRIDAY</div><div class="shimmer" style="width:90%;"></div><div class="shimmer" style="width:55%;"></div><div class="shimmer" style="width:70%;opacity:0.6;"></div></div>
+          <div class="ai-gen-lbl">Researching best routes…</div>
+        </div>
+      </div>
+    </div>
+    <!-- 5 Review -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2mm;">
+      <div style="font-size:7px;font-weight:700;color:#8e8e93;letter-spacing:0.5px;text-transform:uppercase;">⑤ Review</div>
+      <div class="p-sm p-sm-dk">
+        <div class="nb-sm"><div class="nt-sm"></div></div>
+        <div style="flex:1;display:flex;flex-direction:column;background:#1c1c1e;">
+          <div class="sm-hdr"><div class="sm-title">Kyoto, Japan</div><div class="sm-sub">7 days · 18 stops</div></div>
+          <div style="display:flex;gap:1.5mm;padding:1.5mm 3mm;overflow:hidden;"><div style="flex:1;background:#f5f5f0;border-radius:2mm;padding:1mm 0;text-align:center;font-size:6px;color:#1c1c1e;font-weight:700;"><span style="font-size:8px;font-weight:700;display:block;">1</span>Thu</div><div style="flex:1;background:#2c2c2e;border-radius:2mm;padding:1mm 0;text-align:center;font-size:6px;color:#8e8e93;"><span style="font-size:8px;display:block;">2</span>Fri</div><div style="flex:1;background:#2c2c2e;border-radius:2mm;padding:1mm 0;text-align:center;font-size:6px;color:#8e8e93;"><span style="font-size:8px;display:block;">3</span>Sat</div><div style="flex:1;background:#2c2c2e;border-radius:2mm;padding:1mm 0;text-align:center;font-size:6px;color:#8e8e93;"><span style="font-size:8px;display:block;">4</span>Sun</div></div>
+          <div class="gen-stop"><div class="g-dot" style="background:#34c759;"></div><div class="g-thumb" style="background:#1e2d20;">⛩️</div><div class="g-txt">Fushimi Inari</div><div class="g-time">9 AM</div></div>
+          <div class="gen-stop"><div class="g-dot" style="background:#007aff;"></div><div class="g-thumb" style="background:#1a2030;">🍜</div><div class="g-txt">Nishiki Market</div><div class="g-time">12 PM</div></div>
+          <div class="gen-stop"><div class="g-dot" style="background:#ff9500;"></div><div class="g-thumb" style="background:#2d2010;">🏯</div><div class="g-txt">Nijo Castle</div><div class="g-time">3 PM</div></div>
+          <div style="display:flex;align-items:center;gap:1.5mm;background:#1e2d1e;border-radius:2.5mm;padding:2mm 3mm;margin:2mm 3mm 0;"><div style="font-size:8px;">✦</div><div style="font-size:6.5px;font-weight:500;color:#a8c5a0;">Suggest more for Day 1</div></div>
+          <div class="act-btn" style="margin-top:2mm;">Save Trip ✓</div>
+        </div>
+      </div>
+    </div>
+    <!-- Explore -->
+    <div style="display:flex;flex-direction:column;align-items:center;gap:2mm;">
+      <div style="font-size:7px;font-weight:700;color:#8e8e93;letter-spacing:0.5px;text-transform:uppercase;">Explore Tab</div>
+      <div class="p-sm">
+        <div class="nb-sm"><div class="nt-sm"></div></div>
+        <div style="flex:1;display:flex;flex-direction:column;background:#f5f5f0;">
+          <div class="sm-hdr"><div class="sm-title">Explore</div></div>
+          <div class="search-bar" style="margin:1mm 3mm 1.5mm;">🔍&nbsp; Search destinations…</div>
+          <div class="cat-strip"><div class="c-pill act">All</div><div class="c-pill">🏖️</div><div class="c-pill">🏙️</div><div class="c-pill">🌿</div><div class="c-pill">🏛️</div></div>
+          <div class="ai-banner"><div style="font-size:14px;">✦</div><div><div class="ai-b-title">Generate with AI</div><div class="ai-b-sub">Tell us your style</div></div></div>
+          <div class="dest-cards">
+            <div class="dest-card"><div class="dest-img" style="background:linear-gradient(135deg,#dde8d8,#c8d8b8);">🗼</div><div class="dest-info"><div class="dest-name">Paris, France</div><div class="dest-meta">Art, food & landmarks</div><div class="dest-tag">🏙️ City</div></div></div>
+            <div class="dest-card"><div class="dest-img" style="background:linear-gradient(135deg,#e8e4d0,#d8c8a8);">⛩️</div><div class="dest-info"><div class="dest-name">Kyoto, Japan</div><div class="dest-meta">Temples & tradition</div><div class="dest-tag">🏛️ Culture</div></div></div>
+            <div class="dest-card"><div class="dest-img" style="background:linear-gradient(135deg,#d0e8e0,#a8d0c0);">🏝️</div><div class="dest-info"><div class="dest-name">Bali, Indonesia</div><div class="dest-meta">Rice fields & surf</div><div class="dest-tag">🏖️ Beach</div></div></div>
+          </div>
+        </div>
+        <div class="tab-bar"><div class="tab-i"><div class="tab-ico">✈️</div><span class="tab-nm">Trips</span></div><div class="tab-i act"><div class="tab-ico">✦</div><span class="tab-nm">Explore</span></div><div class="tab-i"><div class="tab-ico">◯</div><span class="tab-nm">Profile</span></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     PAGE 4 — SYSTEM ARCHITECTURE
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-label">Section 04</div>
+  <div class="section-title">System Architecture</div>
+  <div class="section-sub">Hybrid Feature + Shared Core pattern. Features are self-contained slices. Services are injected via hooks. Core holds the design system.</div>
+
+  <div class="arch-grid">
+    <div class="arch-layer">
+      <div class="arch-l-title">📱 Mobile App — React Native + Expo (TypeScript)</div>
+      <div class="arch-cols">
+        <div class="arch-box"><div class="arch-box-title">features/auth/</div><div class="arch-box-items">SignIn · SignUp<br>useAuth hook<br>authStore slice</div></div>
+        <div class="arch-box"><div class="arch-box-title">features/trips/</div><div class="arch-box-items">TripList · TripDetail<br>DayEditor · PlaceDetail<br>useTrips · useDays hook<br>tripsStore slice</div></div>
+        <div class="arch-box"><div class="arch-box-title">features/explore/</div><div class="arch-box-items">Discover · AIGenerate<br>DestinationDetail<br>useExplore hook</div></div>
+        <div class="arch-box"><div class="arch-box-title">features/profile/</div><div class="arch-box-items">Settings · SavedPlaces<br>OfflineTrips<br>useProfile hook</div></div>
+      </div>
+    </div>
+    <div class="arch-layer green">
+      <div class="arch-l-title">🧩 core/ — Design System &amp; Shared Hooks</div>
+      <div class="arch-cols">
+        <div class="arch-box"><div class="arch-box-title">core/components/</div><div class="arch-box-items">Card · Sheet · Button<br>TransportPill · CategoryBadge<br>Shimmer · DayStrip<br>MapHero · StopCard</div></div>
+        <div class="arch-box"><div class="arch-box-title">core/theme/</div><div class="arch-box-items">colours.ts<br>typography.ts<br>spacing.ts · shadows.ts</div></div>
+        <div class="arch-box"><div class="arch-box-title">core/hooks/</div><div class="arch-box-items">useTheme<br>useOffline<br>useMapApps</div></div>
+        <div class="arch-box"><div class="arch-box-title">navigation/</div><div class="arch-box-items">Expo Router config<br>Tab shell (3 tabs)<br>Stack navigators</div></div>
+      </div>
+    </div>
+    <div class="arch-layer blue">
+      <div class="arch-l-title">⚙️ services/ — External Integrations (wrapped, injected via hooks)</div>
+      <div class="arch-cols">
+        <div class="arch-box"><div class="arch-box-title">supabase.ts</div><div class="arch-box-items">DB client · Auth<br>RLS · Realtime<br>Edge Functions invoker</div></div>
+        <div class="arch-box"><div class="arch-box-title">openai.ts</div><div class="arch-box-items">generate-trip (Edge Fn)<br>suggest-stops (Edge Fn)<br>Streaming JSON parser</div></div>
+        <div class="arch-box"><div class="arch-box-title">maps.ts</div><div class="arch-box-items">Places Autocomplete<br>Place Details<br>Directions API<br>Deep-link helpers</div></div>
+        <div class="arch-box"><div class="arch-box-title">fcm.ts</div><div class="arch-box-items">FCM token registration<br>Notification handlers<br>expo-notifications</div></div>
+      </div>
+    </div>
+    <div class="arch-layer amber">
+      <div class="arch-l-title">💾 Local Persistence</div>
+      <div class="arch-cols">
+        <div class="arch-box"><div class="arch-box-title">MMKV</div><div class="arch-box-items">Auth tokens<br>Theme preference<br>User prefs (sync reads)</div></div>
+        <div class="arch-box"><div class="arch-box-title">AsyncStorage</div><div class="arch-box-items">Trip JSON snapshots<br>Written on view online<br>Read when offline</div></div>
+        <div class="arch-box"><div class="arch-box-title">Google Maps SDK Cache</div><div class="arch-box-items">On-device map tiles<br>Automatic per area viewed</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top:5mm;">
+    <div style="font-size:8px;font-weight:700;color:#8e8e93;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:3mm;">Data Flow — Trip Creation (AI Path)</div>
+    <div class="flow-diagram">
+      <div class="flow-node dark">User input<br>(dest, style, pace)</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">features/trips<br>useAIGenerate hook</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">services/openai.ts<br>invoke Edge Function</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node sage">Supabase Edge Fn<br>OpenAI GPT-4o stream</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node">JSON chunks parsed<br>staggered to UI</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node dark">User reviews<br>&amp; saves trip</div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node slate">Supabase DB<br>trips · days · stops</div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     PAGE 5 — DATABASE SCHEMA
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-label">Section 05</div>
+  <div class="section-title">Database Schema</div>
+  <div class="section-sub">Six tables in Supabase / PostgreSQL. Row-level security on all tables. <code style="background:#f2f2f7;padding:1mm 2mm;border-radius:1.5mm;font-size:8px;">places</code> is a shared read-only cache of Google Places data. OpenAI is called server-side only — API key never on device.</div>
+
+  <div class="schema-row" style="margin-bottom:4mm;">
+    <div class="tbl">
+      <div class="tbl-hdr th-ink">👤 users</div>
+      <div class="col-r"><span class="badge-pk">PK</span><span class="col-n">id</span><span class="col-t">uuid</span></div>
+      <div class="col-r"><span class="col-n">email</span><span class="col-t">text</span></div>
+      <div class="col-r"><span class="col-n">display_name</span><span class="col-t">text</span></div>
+      <div class="col-r"><span class="col-n">avatar_url</span><span class="col-t">text</span></div>
+      <div class="col-r"><span class="col-n">travel_style</span><span class="col-t">text[]</span></div>
+      <div class="col-r"><span class="col-n">default_pace</span><span class="col-t">text</span></div>
+      <div class="col-r"><span class="col-n">created_at</span><span class="col-t">timestamptz</span></div>
+    </div>
+    <div class="tbl">
+      <div class="tbl-hdr th-green">✈️ trips</div>
+      <div class="col-r"><span class="badge-pk">PK</span><span class="col-n">id</span><span class="col-t">uuid</span></div>
+      <div class="col-r"><span class="badge-fk">FK</span><span class="col-n">user_id</span><span class="col-t">uuid</span></div>
+      <div class="col-r"><span class="col-n">name</span><span class="col-t">text</span></div>
+      <div class="col-r"><span class="col-n">destination</span><span class="col-t">text</span></div>
+      <div class="col-r"><span class="col-n">dest_lat / lng</span><span class="col-t">float8</span></div>
+      <div class="col-r"><span class="col-n">start_date</span><span class="col-t">date</span></div>
+      <div class="col-r"><span class="col-n">end_date</span><span class="col-t">date</span></div>
+      <div class="col-r"><span class="col-n">status</span><span class="col-t">enum</span></div>
+      <div class="col-r"><span class="col-n">cover_emoji</span><span class="col-t">text</span></div>
+      <div class="col-r"><span class="col-n">ai_generated</span><span class="col-t">bool</span></div>
+    </div>
+    <div class="tbl">
+      <div class="tbl-hdr th-blue">📅 days</div>
+      <div class="col-r"><span class="badge-pk">PK</span><span class="col-n">id</span><span class="col-t">uuid</span></div>
+      <div class="col-r"><span class="badge-fk">FK</span><span class="col-n">trip_id</span><span class="col-t">uuid</span></div>
+      <div class="col-r"><span class="col-n">date</span><span class="col-t">date</span></div>
+      <div class="col-r"><span class="col-n">day_number</span><span class="col-t">int2</span></div>
+    </div>
+    <div class="tbl">
+      <div class="tbl-hdr th-amber">📍 stops</div>
+      <div class="col-r"><span class="badge-pk">PK</span><span class="col-n">id</span><span class="col-t">uuid</span></div>
+      <div class="col-r"><span class="badge-fk">FK</span><span class="col-n">day_id</span><span class="col-t">uuid</span></div>
+      <div class="col-r"><span class="badge-fk">FK</span><span class="col-n">place_id</span><span class="col-t">uuid</span></div>
+      <div class="col-r"><span class="col-n">scheduled_time</span><span class="col-t">time</span></div>
+      <div class="col-r"><span class="col-n">order_index</span><span class="col-t">int2</span></div>
+      <div class="col-r"><span class="col-n">remark</span><span class="col-t">text</span></div>
+    </div>
+    <div class="tbl">
+      <div class="tbl-hdr th-purple">🏛️ places</div>
+      <div class="col-r"><span class="badge-pk">PK</span><span class="col-n">id</span><span class="col-t">uuid</span></div>
+      <div class="col-r"><span class="col-n">google_place_id</span><span class="col-t">text unique</span></div>
+      <div class="col-r"><span class="col-n">name</span><span class="col-t">text</span></div>
+      <div class="col-r"><span class="col-n">lat / lng</span><span class="col-t">float8</span></div>
+      <div class="col-r"><span class="col-n">category</span><span class="col-t">text</span></div>
+      <div class="col-r"><span class="col-n">thumbnail_url</span><span class="col-t">text</span></div>
+      <div class="col-r"><span class="col-n">rating</span><span class="col-t">float4</span></div>
+      <div class="col-r"><span class="col-n">opening_hours</span><span class="col-t">jsonb</span></div>
+      <div class="col-r"><span class="col-n">cached_at</span><span class="col-t">timestamptz</span></div>
+    </div>
+    <div class="tbl">
+      <div class="tbl-hdr th-slate">🚇 transport_segments</div>
+      <div class="col-r"><span class="badge-pk">PK</span><span class="col-n">id</span><span class="col-t">uuid</span></div>
+      <div class="col-r"><span class="badge-fk">FK</span><span class="col-n">from_stop_id</span><span class="col-t">uuid</span></div>
+      <div class="col-r"><span class="badge-fk">FK</span><span class="col-n">to_stop_id</span><span class="col-t">uuid</span></div>
+      <div class="col-r"><span class="col-n">mode</span><span class="col-t">enum</span></div>
+      <div class="col-r"><span class="col-n">duration_min</span><span class="col-t">int2</span></div>
+      <div class="col-r"><span class="col-n">route_label</span><span class="col-t">text</span></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+  <div style="font-size:8px;font-weight:700;color:#8e8e93;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:3mm;">Relationships</div>
+  <div class="rel-row"><span class="rel-f">users</span><span class="rel-ar">→ 1:many →</span><span class="rel-f">trips</span><span class="rel-c">&nbsp;&nbsp;user owns trips</span></div>
+  <div class="rel-row"><span class="rel-f">trips</span><span class="rel-ar">→ 1:many →</span><span class="rel-f">days</span><span class="rel-c">&nbsp;&nbsp;trip spans days</span></div>
+  <div class="rel-row"><span class="rel-f">days</span><span class="rel-ar">→ 1:many →</span><span class="rel-f">stops</span><span class="rel-c">&nbsp;&nbsp;day has ordered stops</span></div>
+  <div class="rel-row"><span class="rel-f">stops</span><span class="rel-ar">→ many:1 →</span><span class="rel-f">places</span><span class="rel-c">&nbsp;&nbsp;stops reference cached Google Place data</span></div>
+  <div class="rel-row"><span class="rel-f">stops</span><span class="rel-ar">→ 1:many →</span><span class="rel-f">transport_segments</span><span class="rel-c">&nbsp;&nbsp;each stop has segments to the next stop</span></div>
+
+  <div class="divider"></div>
+  <div style="font-size:8px;font-weight:700;color:#8e8e93;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:2mm;">Row-Level Security</div>
+  <div style="font-size:8px;color:#3a3a3c;line-height:1.6;">All tables except <code style="background:#f2f2f7;padding:0.5mm 2mm;border-radius:1mm;">places</code> enforce: users can only SELECT / INSERT / UPDATE / DELETE their own rows (matched by <code style="background:#f2f2f7;padding:0.5mm 2mm;border-radius:1mm;">auth.uid()</code>). The <code style="background:#f2f2f7;padding:0.5mm 2mm;border-radius:1mm;">places</code> table is readable by all authenticated users and writable only by the service role (populated by the server when stops are added).</div>
+</div>
+
+<!-- ════════════════════════════════════════════════
+     PAGE 6 — SERVICES + ERROR + TESTING
+════════════════════════════════════════════════ -->
+<div class="page">
+  <div class="section-label">Section 06</div>
+  <div class="section-title">Services, Error Handling &amp; Testing</div>
+
+  <div class="svc-list" style="margin-bottom:5mm;">
+    <div class="svc-row"><div class="svc-badge sb-sup"><div style="font-size:18px;">🛢️</div>Supabase</div><div class="svc-detail"><div class="svc-title">Auth + Database + Realtime</div><div class="svc-desc">Email + Google OAuth. All CRUD on trips/days/stops/places. RLS enforced. Realtime sync across devices for same user. Edge Functions host the OpenAI calls and push notification scheduler.</div><div class="svc-calls"><div class="svc-call">supabase.auth.signIn()</div><div class="svc-call">.from('trips').select()</div><div class="svc-call">.upsert()</div><div class="svc-call">.subscribe()</div><div class="svc-call">functions.invoke()</div></div></div></div>
+    <div class="svc-row"><div class="svc-badge sb-oai"><div style="font-size:18px;">✦</div>OpenAI</div><div class="svc-detail"><div class="svc-title">AI Itinerary Generation + Stop Suggestions</div><div class="svc-desc">Called server-side via Supabase Edge Function only — API key never on device. GPT-4o with response_format: json_schema streams structured day→stops arrays. "Suggest more" passes existing stops as context.</div><div class="svc-calls"><div class="svc-call">generate-trip (Edge Fn)</div><div class="svc-call">suggest-stops (Edge Fn)</div><div class="svc-call">response_format: json_schema</div></div></div></div>
+    <div class="svc-row"><div class="svc-badge sb-gm"><div style="font-size:18px;">🗺️</div>Google Maps</div><div class="svc-detail"><div class="svc-title">Maps · Places · Directions</div><div class="svc-desc">react-native-maps with Google Maps provider. Places Autocomplete for stop search. Place Details populates the places cache (name, category, thumbnail, hours, rating). Directions API fetches transport durations stored in transport_segments. Places re-fetched if cached_at &gt; 7 days.</div><div class="svc-calls"><div class="svc-call">Places Autocomplete</div><div class="svc-call">Place Details API</div><div class="svc-call">Directions API</div><div class="svc-call">Maps SDK</div></div></div></div>
+    <div class="svc-row"><div class="svc-badge sb-fb"><div style="font-size:18px;">🔔</div>Firebase FCM</div><div class="svc-detail"><div class="svc-title">Push Notification Reminders</div><div class="svc-desc">Trip-day reminders sent via a Supabase scheduled Edge Function each morning. expo-notifications handles FCM token registration and foreground/background display. Users opt out per trip in Profile → Settings.</div><div class="svc-calls"><div class="svc-call">Expo.Notifications.getToken()</div><div class="svc-call">FCM via Edge Function</div></div></div></div>
+    <div class="svc-row"><div class="svc-badge sb-loc"><div style="font-size:18px;">💾</div>MMKV + AsyncStorage</div><div class="svc-detail"><div class="svc-title">Local Persistence &amp; Offline Cache</div><div class="svc-desc">MMKV: auth tokens, theme, prefs (synchronous reads). AsyncStorage: JSON trip snapshots written on every online view, read when offline detected via @react-native-community/netinfo.</div><div class="svc-calls"><div class="svc-call">MMKV.set('token', ...)</div><div class="svc-call">AsyncStorage.setItem('trip:id', JSON)</div></div></div></div>
+  </div>
+
+  <div style="display:flex;gap:6mm;">
+    <div style="flex:1;">
+      <div style="font-size:8px;font-weight:700;color:#8e8e93;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:2mm;">Error Handling</div>
+      <table class="err-table">
+        <thead><tr><th>Scenario</th><th>Handling</th></tr></thead>
+        <tbody>
+          <tr><td><span class="e-tag e-off">Offline</span>No network</td><td>Sage banner slides in. AsyncStorage snapshot loads trips. Network-only features grey out with tooltip.</td></tr>
+          <tr><td><span class="e-tag e-api">API</span>OpenAI fails</td><td>Inline "Couldn't generate — try again" with retry button. No modal, no crash.</td></tr>
+          <tr><td><span class="e-tag e-api">API</span>Maps unavailable</td><td>Transport pills show "–". Map hero shows static placeholder. Search shows "unavailable".</td></tr>
+          <tr><td><span class="e-tag e-usr">Auth</span>Token expired</td><td>Supabase auto-refreshes. On failure, quiet redirect to Sign In with "Session expired" notice.</td></tr>
+          <tr><td><span class="e-tag e-usr">User</span>Remark save fails</td><td>Optimistic update shown; on failure, value reverts + red underline + retry tap.</td></tr>
+          <tr><td><span class="e-tag e-off">Offline</span>Map app missing</td><td>Linking.canOpenURL() checked first; only installed apps shown; browser fallback if none.</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="flex:1;">
+      <div style="font-size:8px;font-weight:700;color:#8e8e93;letter-spacing:0.5px;text-transform:uppercase;margin-bottom:2mm;">Testing Strategy</div>
+      <div class="test-grid">
+        <div class="test-card"><div class="test-lyr">Unit — Jest</div><div class="test-item"><div class="test-dot"></div>Zustand store actions</div><div class="test-item"><div class="test-dot"></div>Service helpers</div><div class="test-item"><div class="test-dot"></div>AI JSON parser</div><div class="test-item"><div class="test-dot"></div>Offline cache logic</div></div>
+        <div class="test-card"><div class="test-lyr">Component — RTL</div><div class="test-item"><div class="test-dot"></div>Stop card renders correctly</div><div class="test-item"><div class="test-dot"></div>Transport pill tap</div><div class="test-item"><div class="test-dot"></div>Day strip scroll</div><div class="test-item"><div class="test-dot"></div>Remark save on blur</div></div>
+        <div class="test-card"><div class="test-lyr">Integration — Supabase Local</div><div class="test-item"><div class="test-dot"></div>Create trip/day/stop flow</div><div class="test-item"><div class="test-dot"></div>RLS enforcement</div><div class="test-item"><div class="test-dot"></div>Stop reorder persistence</div><div class="test-item"><div class="test-dot"></div>Transport segment creation</div></div>
+        <div class="test-card"><div class="test-lyr">E2E — Maestro</div><div class="test-item"><div class="test-dot"></div>Sign up → create → stop → detail</div><div class="test-item"><div class="test-dot"></div>AI generate flow</div><div class="test-item"><div class="test-dot"></div>Offline trip load</div><div class="test-item"><div class="test-dot"></div>Dark mode persistence</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

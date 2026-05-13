@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design — Information Architecture</title>
+<script src="/helper.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    background: #f5f5f0;
+    color: #1c1c1e;
+    padding: 32px 24px 60px;
+  }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #6e6e73; margin-bottom: 28px; line-height: 1.5; }
+  .tag { display:inline-block;background:#1c1c1e;color:#f5f5f0;font-size:10px;font-weight:600;letter-spacing:0.5px;padding:4px 10px;border-radius:20px;margin-bottom:12px; }
+
+  .section-card {
+    background: #fff;
+    border-radius: 20px;
+    padding: 22px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+    margin-bottom: 20px;
+  }
+  .section-title { font-size: 15px; font-weight: 600; letter-spacing: -0.2px; margin-bottom: 4px; }
+  .section-sub { font-size: 12px; color: #6e6e73; margin-bottom: 16px; line-height: 1.5; }
+
+  /* ── IA tree ── */
+  .ia-root {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+  .ia-node {
+    background: #1c1c1e;
+    color: #f5f5f0;
+    border-radius: 12px;
+    padding: 8px 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-align: center;
+  }
+  .ia-connector-v {
+    width: 2px;
+    height: 18px;
+    background: #e5e5ea;
+    margin: 0 auto;
+  }
+  .ia-connector-h {
+    height: 2px;
+    background: #e5e5ea;
+  }
+  .ia-tab-row {
+    display: flex;
+    gap: 0;
+    width: 100%;
+    justify-content: center;
+    position: relative;
+  }
+  .ia-tab-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1;
+    max-width: 160px;
+    position: relative;
+  }
+  /* horizontal line across all tabs */
+  .ia-hline {
+    position: absolute;
+    top: 0;
+    left: 0; right: 0;
+    height: 2px;
+    background: #e5e5ea;
+    z-index: 0;
+  }
+  .ia-tab {
+    border-radius: 12px;
+    padding: 8px 14px;
+    font-size: 11px;
+    font-weight: 600;
+    text-align: center;
+    min-width: 80px;
+    position: relative;
+    z-index: 1;
+  }
+  .ia-tab.map { background: #e8f2e8; color: #1e4a1e; }
+  .ia-tab.trips { background: #e4eef5; color: #1a3a54; }
+  .ia-tab.explore { background: #f2ede8; color: #4a3020; }
+  .ia-tab.profile { background: #f0eef5; color: #3a2054; }
+
+  .ia-screen {
+    background: #f2f2f7;
+    border-radius: 8px;
+    padding: 5px 10px;
+    font-size: 10px;
+    color: #3a3a3c;
+    text-align: center;
+    margin-top: 8px;
+    white-space: nowrap;
+  }
+  .ia-screen.accent { background: #1c1c1e; color: #fff; }
+
+  /* ── gesture map ── */
+  .gesture-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-top: 4px;
+  }
+  .gesture-item {
+    background: #f9f9f6;
+    border-radius: 12px;
+    padding: 11px 13px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+  .gesture-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .gesture-name { font-size: 11px; font-weight: 600; color: #1c1c1e; margin-bottom: 2px; }
+  .gesture-desc { font-size: 10px; color: #6e6e73; line-height: 1.4; }
+
+  /* ── microinteraction list ── */
+  .micro-list { display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
+  .micro-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: #f9f9f6;
+    border-radius: 12px;
+    padding: 10px 13px;
+  }
+  .micro-trigger {
+    font-size: 10px; font-weight: 600;
+    background: #1c1c1e; color: #fff;
+    border-radius: 6px; padding: 3px 8px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .micro-arrow { color: #c7c7cc; font-size: 11px; flex-shrink: 0; }
+  .micro-response { font-size: 11px; color: #3a3a3c; line-height: 1.4; }
+
+  /* ── offline strategy ── */
+  .offline-row {
+    display: flex; gap: 10px; flex-wrap: wrap; margin-top: 4px;
+  }
+  .offline-pill {
+    background: #f2f2f7;
+    border-radius: 10px;
+    padding: 8px 13px;
+    font-size: 11px;
+    color: #3a3a3c;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .offline-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .offline-dot.green { background: #34c759; }
+  .offline-dot.yellow { background: #ff9500; }
+  .offline-dot.red { background: #ff3b30; }
+</style>
+</head>
+<body>
+
+<div class="tag">✦ Design · Section 1 of 3</div>
+<h1>Information Architecture</h1>
+<p class="subtitle">Screen map, gesture system, and microinteractions — the skeleton of the app before we look at individual screens.</p>
+
+<!-- SCREEN MAP -->
+<div class="section-card">
+  <div class="section-title">Screen Map</div>
+  <div class="section-sub">4-tab shell. Map is the default landing tab. Every screen can reach the map. Deep linking supported via Expo Router.</div>
+
+  <div class="ia-root">
+    <!-- Root -->
+    <div class="ia-node">Smart Travel Planner</div>
+    <div class="ia-connector-v"></div>
+
+    <!-- Auth gate -->
+    <div style="display:flex;gap:16px;align-items:flex-start;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+        <div class="ia-tab" style="background:#f2f2f7;color:#6e6e73;">Onboarding</div>
+        <div class="ia-connector-v"></div>
+        <div class="ia-screen">Welcome cards</div>
+        <div class="ia-screen">Sign In / Sign Up</div>
+        <div class="ia-screen">Auth (Supabase)</div>
+      </div>
+      <div style="font-size:22px;color:#c7c7cc;margin-top:8px;">→</div>
+      <!-- 4 tabs -->
+      <div style="display:flex;flex-direction:column;align-items:center;">
+        <div class="ia-node" style="background:#f2f2f7;color:#1c1c1e;font-size:11px;">Tab Shell (Expo Router)</div>
+        <div class="ia-connector-v"></div>
+        <div class="ia-tab-row" style="position:relative;">
+          <div class="ia-hline" style="top:16px;"></div>
+
+          <div class="ia-tab-col">
+            <div class="ia-connector-v" style="height:16px;"></div>
+            <div class="ia-tab map">🗺️ Map</div>
+            <div class="ia-connector-v"></div>
+            <div class="ia-screen accent">Home / Map</div>
+            <div class="ia-screen">Place Detail</div>
+            <div class="ia-screen">Route View</div>
+          </div>
+
+          <div class="ia-tab-col">
+            <div class="ia-connector-v" style="height:16px;"></div>
+            <div class="ia-tab trips">✈️ Trips</div>
+            <div class="ia-connector-v"></div>
+            <div class="ia-screen">Trip List</div>
+            <div class="ia-screen">Trip Detail</div>
+            <div class="ia-screen">Day Editor</div>
+            <div class="ia-screen">Create Trip</div>
+          </div>
+
+          <div class="ia-tab-col">
+            <div class="ia-connector-v" style="height:16px;"></div>
+            <div class="ia-tab explore">✦ Explore</div>
+            <div class="ia-connector-v"></div>
+            <div class="ia-screen">Discover Feed</div>
+            <div class="ia-screen">AI Generate</div>
+            <div class="ia-screen">Destination</div>
+          </div>
+
+          <div class="ia-tab-col">
+            <div class="ia-connector-v" style="height:16px;"></div>
+            <div class="ia-tab profile">◯ Profile</div>
+            <div class="ia-connector-v"></div>
+            <div class="ia-screen">Settings</div>
+            <div class="ia-screen">Saved Places</div>
+            <div class="ia-screen">Offline Trips</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- GESTURE SYSTEM -->
+<div class="section-card">
+  <div class="section-title">Gesture System</div>
+  <div class="section-sub">All gestures follow a spatial metaphor: horizontal = navigate between things, vertical = reveal depth. No gesture conflicts with React Native's built-in scroll.</div>
+  <div class="gesture-grid">
+    <div class="gesture-item">
+      <div class="gesture-icon">↕</div>
+      <div>
+        <div class="gesture-name">Sheet drag</div>
+        <div class="gesture-desc">Drag bottom sheet up to expand itinerary. Down to collapse back to peek. Snap points at 30%, 60%, 95%.</div>
+      </div>
+    </div>
+    <div class="gesture-item">
+      <div class="gesture-icon">←</div>
+      <div>
+        <div class="gesture-name">Card swipe left</div>
+        <div class="gesture-desc">Swipe a trip card left to reveal Delete / Archive actions (destructive red, non-destructive grey).</div>
+      </div>
+    </div>
+    <div class="gesture-item">
+      <div class="gesture-icon">☰</div>
+      <div>
+        <div class="gesture-name">Long-press drag</div>
+        <div class="gesture-desc">Long-press an itinerary stop to lift and reorder. Haptic on pickup, spring settle on drop.</div>
+      </div>
+    </div>
+    <div class="gesture-item">
+      <div class="gesture-icon">⊕</div>
+      <div>
+        <div class="gesture-name">Pinch map</div>
+        <div class="gesture-desc">Native Google Maps pinch-to-zoom. Pins cluster at low zoom, expand at high zoom with label bubbles.</div>
+      </div>
+    </div>
+    <div class="gesture-item">
+      <div class="gesture-icon">→</div>
+      <div>
+        <div class="gesture-name">Swipe right (back)</div>
+        <div class="gesture-desc">iOS-native full-screen swipe back on all push screens. Gesture drives the transition animation.</div>
+      </div>
+    </div>
+    <div class="gesture-item">
+      <div class="gesture-icon">↔</div>
+      <div>
+        <div class="gesture-name">Day strip scroll</div>
+        <div class="gesture-desc">Horizontal scroll on the day pill strip. Snaps per day, smooth inertia, selected pill auto-centres.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MICROINTERACTIONS -->
+<div class="section-card">
+  <div class="section-title">Microinteractions</div>
+  <div class="section-sub">Every state change has a physical response. Animations use spring curves (not easing) to feel tactile, not digital.</div>
+  <div class="micro-list">
+    <div class="micro-row">
+      <div class="micro-trigger">Tap card</div>
+      <div class="micro-arrow">→</div>
+      <div class="micro-response">Scale down to 0.97 on press, spring back on release. Shared element transition to detail screen.</div>
+    </div>
+    <div class="micro-row">
+      <div class="micro-trigger">Add activity</div>
+      <div class="micro-arrow">→</div>
+      <div class="micro-response">Row inserts with a height spring from 0. Map pin appears with a bounce drop. Light haptic impact.</div>
+    </div>
+    <div class="micro-row">
+      <div class="micro-trigger">AI generate</div>
+      <div class="micro-arrow">→</div>
+      <div class="micro-response">Shimmer skeleton cards appear immediately. Items replace skeleton one-by-one with a staggered fade-up (80ms offset per card).</div>
+    </div>
+    <div class="micro-row">
+      <div class="micro-trigger">Toggle dark mode</div>
+      <div class="micro-arrow">→</div>
+      <div class="micro-response">Cross-fade over 300ms driven by system preference. No flash, no jump.</div>
+    </div>
+    <div class="micro-row">
+      <div class="micro-trigger">Complete day</div>
+      <div class="micro-arrow">→</div>
+      <div class="micro-response">Day pill gets a subtle checkmark overlay. Confetti burst (3 particles, not overwhelming) on trip completion.</div>
+    </div>
+    <div class="micro-row">
+      <div class="micro-trigger">Offline mode</div>
+      <div class="micro-arrow">→</div>
+      <div class="micro-response">Thin sage banner slides in from top. Cached content still renders. Network-only features grey out with tooltip.</div>
+    </div>
+  </div>
+</div>
+
+<!-- OFFLINE STRATEGY -->
+<div class="section-card">
+  <div class="section-title">Offline Strategy</div>
+  <div class="section-sub">Trips are the primary offline asset. Maps tiles cache on-demand. AI and push notifications require connectivity.</div>
+  <div class="offline-row">
+    <div class="offline-pill"><div class="offline-dot green"></div>Full offline — Trip itineraries, day plans, saved places</div>
+    <div class="offline-pill"><div class="offline-dot green"></div>Full offline — Downloaded map tiles (per-trip area)</div>
+    <div class="offline-pill"><div class="offline-dot yellow"></div>Cached — Destination info, attraction details</div>
+    <div class="offline-pill"><div class="offline-dot red"></div>Online only — AI generation, live search, push notifications</div>
+  </div>
+  <div style="margin-top:12px;font-size:11px;color:#6e6e73;line-height:1.6;">
+    Storage strategy: Supabase local cache via <code style="background:#f2f2f7;padding:1px 5px;border-radius:4px;font-size:10px;">@supabase/supabase-js</code> + AsyncStorage for trip JSON snapshots. MMKV for fast key-value (theme, auth tokens). No SQLite needed at MVP.
+  </div>
+</div>
+
+</body>
+</html>

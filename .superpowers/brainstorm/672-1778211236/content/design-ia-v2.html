@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design — IA v2</title>
+<script src="/helper.js"></script>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+    background: #f5f5f0;
+    color: #1c1c1e;
+    padding: 32px 24px 60px;
+  }
+  h1 { font-size: 22px; font-weight: 600; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .subtitle { font-size: 14px; color: #6e6e73; margin-bottom: 28px; line-height: 1.5; }
+  .tag { display:inline-block;background:#1c1c1e;color:#f5f5f0;font-size:10px;font-weight:600;letter-spacing:0.5px;padding:4px 10px;border-radius:20px;margin-bottom:12px; }
+  .change-tag { display:inline-block;background:#ff9500;color:#fff;font-size:10px;font-weight:600;letter-spacing:0.5px;padding:3px 9px;border-radius:20px;margin-left:8px;vertical-align:middle; }
+
+  .section-card { background:#fff;border-radius:20px;padding:22px;box-shadow:0 1px 4px rgba(0,0,0,0.07);margin-bottom:20px; }
+  .section-title { font-size:15px;font-weight:600;letter-spacing:-0.2px;margin-bottom:4px; }
+  .section-sub { font-size:12px;color:#6e6e73;margin-bottom:16px;line-height:1.5; }
+
+  /* ── screen map ── */
+  .flow-wrap { overflow-x: auto; padding-bottom: 8px; }
+  .ia-tree {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 580px;
+  }
+  .ia-node { background:#1c1c1e;color:#f5f5f0;border-radius:12px;padding:8px 20px;font-size:12px;font-weight:600; }
+  .v-line { width:2px;height:20px;background:#e5e5ea;margin:0 auto; }
+  .tab-row { display:flex;width:100%;justify-content:center;gap:0; }
+  .tab-col { display:flex;flex-direction:column;align-items:center;flex:1;max-width:160px;position:relative; }
+  .h-bar { position:absolute;top:20px;left:0;right:0;height:2px;background:#e5e5ea;z-index:0; }
+  .tab-chip {
+    border-radius:12px;padding:7px 14px;font-size:11px;font-weight:600;
+    text-align:center;min-width:84px;position:relative;z-index:1;
+  }
+  .chip-home { background:#e8f2e8;color:#1e4a1e; }
+  .chip-explore { background:#f2ede8;color:#4a3020; }
+  .chip-profile { background:#f0eef5;color:#3a2054; }
+  .chip-new { background:#fff3e0;color:#7a4000; }
+  .screen-pill { background:#f2f2f7;border-radius:8px;padding:4px 10px;font-size:10px;color:#3a3a3c;text-align:center;margin-top:6px;white-space:nowrap; }
+  .screen-pill.dark { background:#1c1c1e;color:#fff; }
+  .screen-pill.map { background:#e8f2e8;color:#1e4a1e; }
+  .screen-pill.ai { background:#e4eef5;color:#1a3a54; }
+
+  /* drill-down arrow */
+  .drill-row { display:flex;align-items:flex-start;gap:10px;margin-top:16px; }
+  .drill-arrow { font-size:20px;color:#c7c7cc;margin-top:28px;flex-shrink:0; }
+  .drill-box { background:#f9f9f6;border-radius:14px;padding:12px 14px;flex:1; }
+  .drill-title { font-size:11px;font-weight:700;color:#1c1c1e;margin-bottom:8px;letter-spacing:0.2px; }
+  .drill-screens { display:flex;flex-wrap:wrap;gap:6px; }
+
+  /* ── phone pair ── */
+  .phone-pair { display:flex;gap:24px;justify-content:center;flex-wrap:wrap;margin-top:8px; }
+  .phone-wrap { display:flex;flex-direction:column;align-items:center;gap:10px; }
+  .phone-label { font-size:10px;font-weight:600;letter-spacing:0.6px;text-transform:uppercase;color:#6e6e73; }
+  .phone {
+    width:210px;height:455px;border-radius:42px;
+    background:#fff;border:5.5px solid #1c1c1e;
+    box-shadow:0 24px 56px rgba(0,0,0,0.18),inset 0 0 0 1px rgba(0,0,0,0.05);
+    overflow:hidden;display:flex;flex-direction:column;
+  }
+  .phone-dark { background:#1c1c1e;border-color:#2c2c2e; }
+  .notch-bar { background:#1c1c1e;height:32px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+  .phone-dark .notch-bar { background:#000; }
+  .notch { width:80px;height:20px;background:#1c1c1e;border-radius:0 0 16px 16px; }
+  .phone-dark .notch { background:#000; }
+  .screen { flex:1;display:flex;flex-direction:column;overflow:hidden;background:#f5f5f0; }
+  .phone-dark .screen { background:#1c1c1e; }
+
+  /* status bar */
+  .status { display:flex;justify-content:space-between;padding:6px 14px 0;font-size:8px;color:#8e8e93; }
+
+  /* header */
+  .p-header { padding:10px 14px 6px; }
+  .p-greeting { font-size:9px;color:#8e8e93;font-weight:500;letter-spacing:0.3px;text-transform:uppercase; }
+  .p-title { font-size:18px;font-weight:600;letter-spacing:-0.5px;color:#1c1c1e;margin-top:1px; }
+  .phone-dark .p-title { color:#f5f5f0; }
+  .p-title-light { color:#f5f5f0; }
+
+  /* segment */
+  .segment { display:flex;gap:0;background:#e5e5ea;border-radius:8px;margin:4px 14px 10px;padding:2px; }
+  .phone-dark .segment { background:#2c2c2e; }
+  .seg-btn { flex:1;border-radius:6px;padding:4px 0;font-size:8px;font-weight:600;text-align:center;color:#8e8e93; }
+  .seg-btn.active { background:#fff;color:#1c1c1e;box-shadow:0 1px 3px rgba(0,0,0,0.1); }
+  .phone-dark .seg-btn.active { background:#3a3a3c;color:#f5f5f0; }
+
+  /* trip cards */
+  .trip-cards { flex:1;overflow:hidden;padding:0 12px;display:flex;flex-direction:column;gap:8px; }
+  .tcard {
+    border-radius:16px;overflow:hidden;flex-shrink:0;
+    box-shadow:0 2px 8px rgba(0,0,0,0.08);
+    position:relative;
+  }
+  .tcard-img {
+    height:70px;display:flex;align-items:center;justify-content:center;
+    font-size:28px;
+  }
+  .tcard-body { background:#fff;padding:8px 10px; }
+  .phone-dark .tcard-body { background:#2c2c2e; }
+  .tcard-name { font-size:11px;font-weight:600;color:#1c1c1e; }
+  .phone-dark .tcard-name { color:#f5f5f0; }
+  .tcard-meta { font-size:9px;color:#8e8e93;margin-top:1px; }
+  .tcard-badge {
+    position:absolute;top:8px;right:8px;
+    background:rgba(255,255,255,0.88);backdrop-filter:blur(8px);
+    border-radius:6px;padding:2px 7px;font-size:8px;font-weight:600;color:#1c1c1e;
+  }
+  .tcard-badge.soon { background:rgba(52,199,89,0.88);color:#fff; }
+
+  /* fab */
+  .fab {
+    position:absolute;bottom:56px;right:12px;
+    width:36px;height:36px;border-radius:18px;
+    background:#1c1c1e;
+    display:flex;align-items:center;justify-content:center;
+    font-size:18px;color:#fff;font-weight:300;
+    box-shadow:0 4px 14px rgba(0,0,0,0.25);
+    z-index:10;
+  }
+  .phone-dark .fab { background:#f5f5f0; color:#1c1c1e; }
+
+  /* tab bar */
+  .tab-bar {
+    display:flex;justify-content:space-around;
+    background:rgba(255,255,255,0.92);backdrop-filter:blur(20px);
+    border-top:0.5px solid rgba(0,0,0,0.1);
+    padding:7px 0 10px;flex-shrink:0;
+  }
+  .phone-dark .tab-bar { background:rgba(28,28,30,0.92);border-color:rgba(255,255,255,0.1); }
+  .tab-item { text-align:center; }
+  .tab-ico { font-size:15px; }
+  .tab-name { display:block;font-size:7px;margin-top:1px;color:#8e8e93;font-weight:500; }
+  .tab-item.active .tab-name { color:#1c1c1e; }
+  .phone-dark .tab-item.active .tab-name { color:#f5f5f0; }
+
+  /* trip detail phone screens */
+  .map-hero {
+    height:130px;
+    background:
+      repeating-linear-gradient(0deg,transparent,transparent 20px,rgba(255,255,255,0.5) 20px,rgba(255,255,255,0.5) 22px),
+      repeating-linear-gradient(90deg,transparent,transparent 28px,rgba(255,255,255,0.5) 28px,rgba(255,255,255,0.5) 30px),
+      linear-gradient(160deg,#dde8d8,#d8e0e8);
+    position:relative;flex-shrink:0;
+  }
+  .map-hero-dark {
+    background:
+      repeating-linear-gradient(0deg,transparent,transparent 20px,rgba(255,255,255,0.06) 20px,rgba(255,255,255,0.06) 22px),
+      repeating-linear-gradient(90deg,transparent,transparent 28px,rgba(255,255,255,0.06) 28px,rgba(255,255,255,0.06) 30px),
+      linear-gradient(160deg,#1e2d20,#192028);
+  }
+  .map-overlay-btn {
+    position:absolute;bottom:8px;right:8px;
+    background:rgba(255,255,255,0.88);backdrop-filter:blur(10px);
+    border-radius:8px;padding:4px 8px;font-size:8px;font-weight:600;color:#1c1c1e;
+  }
+  .map-pin-sm {
+    position:absolute;top:40px;left:50%;transform:translateX(-50%);
+    display:flex;flex-direction:column;align-items:center;
+  }
+  .pin-head { width:10px;height:10px;background:#1c1c1e;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,0.2); }
+  .pin-bubble { background:#fff;border-radius:6px;padding:2px 6px;font-size:7px;font-weight:600;color:#1c1c1e;margin-top:3px;box-shadow:0 2px 6px rgba(0,0,0,0.15); }
+
+  .detail-body { flex:1;overflow:hidden;padding:10px 12px 0;display:flex;flex-direction:column;gap:6px; }
+  .day-strip { display:flex;gap:5px;overflow:hidden; }
+  .day-pill { flex:1;background:#f2f2f7;border-radius:8px;padding:4px 0;text-align:center;font-size:7px;color:#8e8e93; }
+  .phone-dark .day-pill { background:#2c2c2e; }
+  .day-pill.active { background:#1c1c1e;color:#fff; }
+  .phone-dark .day-pill.active { background:#f5f5f0;color:#1c1c1e; }
+  .day-num { font-size:10px;font-weight:700;display:block; }
+  .act-row { display:flex;align-items:center;gap:7px;padding:5px 0;border-bottom:0.5px solid rgba(0,0,0,0.06); }
+  .phone-dark .act-row { border-color:rgba(255,255,255,0.06); }
+  .act-dot { width:6px;height:6px;border-radius:50%;flex-shrink:0; }
+  .act-text { font-size:9px;color:#3a3a3c;flex:1; }
+  .phone-dark .act-text { color:#aeaeb2; }
+  .act-time { font-size:8px;color:#8e8e93; }
+  .ai-btn {
+    display:flex;align-items:center;gap:5px;
+    background:#f2f2f7;border-radius:10px;padding:7px 10px;margin-top:auto;margin-bottom:8px;
+  }
+  .phone-dark .ai-btn { background:#2c2c2e; }
+  .ai-btn-text { font-size:9px;font-weight:500;color:#6e6e73; }
+  .ai-sparkle { font-size:11px; }
+
+  /* gesture + micro */
+  .micro-list { display:flex;flex-direction:column;gap:8px;margin-top:4px; }
+  .micro-row { display:flex;align-items:center;gap:12px;background:#f9f9f6;border-radius:12px;padding:10px 13px; }
+  .micro-trigger { font-size:10px;font-weight:600;background:#1c1c1e;color:#fff;border-radius:6px;padding:3px 8px;white-space:nowrap;flex-shrink:0; }
+  .micro-arrow { color:#c7c7cc;font-size:11px;flex-shrink:0; }
+  .micro-response { font-size:11px;color:#3a3a3c;line-height:1.4; }
+
+  .offline-row { display:flex;gap:8px;flex-wrap:wrap;margin-top:4px; }
+  .offline-pill { background:#f2f2f7;border-radius:10px;padding:7px 12px;font-size:11px;color:#3a3a3c;display:flex;align-items:center;gap:6px; }
+  .offline-dot { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+  .offline-dot.green { background:#34c759; }
+  .offline-dot.yellow { background:#ff9500; }
+  .offline-dot.red { background:#ff3b30; }
+</style>
+</head>
+<body>
+
+<div class="tag">✦ Design · IA Updated</div>
+<h1>Information Architecture <span class="change-tag">Revised</span></h1>
+<p class="subtitle">Home is now a <strong>Trip List</strong>. The map lives inside each trip's detail view. Cleaner mental model — browse plans first, dive into map when needed.</p>
+
+<!-- SCREEN MAP -->
+<div class="section-card">
+  <div class="section-title">Revised Screen Map</div>
+  <div class="section-sub">3-tab shell — Trips (home), Explore, Profile. Map is a full-screen view inside Trip Detail, not a standalone tab.</div>
+  <div class="flow-wrap">
+    <div class="ia-tree">
+      <div class="ia-node">Smart Travel Planner</div>
+      <div class="v-line"></div>
+
+      <div style="display:flex;gap:20px;align-items:flex-start;width:100%;justify-content:center;">
+        <!-- Auth -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
+          <div class="tab-chip" style="background:#f2f2f7;color:#6e6e73;">Onboarding / Auth</div>
+          <div class="v-line"></div>
+          <div class="screen-pill">Welcome slides</div>
+          <div class="screen-pill">Sign In · Sign Up</div>
+          <div class="screen-pill">Supabase Auth</div>
+        </div>
+
+        <div style="font-size:20px;color:#c7c7cc;margin-top:8px;">→</div>
+
+        <!-- 3 tabs -->
+        <div style="display:flex;flex-direction:column;align-items:center;flex:1;max-width:460px;">
+          <div class="ia-node" style="background:#f2f2f7;color:#1c1c1e;font-size:11px;margin-bottom:0;">3-Tab Shell</div>
+          <div class="v-line"></div>
+          <div class="tab-row" style="position:relative;">
+            <div class="h-bar" style="top:20px;"></div>
+
+            <!-- Trips tab -->
+            <div class="tab-col">
+              <div class="v-line" style="height:20px;"></div>
+              <div class="tab-chip chip-home">✈️ Trips</div>
+              <div class="v-line"></div>
+              <div class="screen-pill dark">Trip List (Home)</div>
+              <div class="screen-pill dark">Create Trip</div>
+              <div style="margin-top:6px;background:#e8f2e8;border-radius:10px;padding:8px;width:100%;max-width:140px;">
+                <div style="font-size:9px;font-weight:700;color:#1e4a1e;margin-bottom:5px;">→ Trip Detail</div>
+                <div class="screen-pill map" style="margin-top:0;">Map View</div>
+                <div class="screen-pill map">Day Editor</div>
+                <div class="screen-pill map">Place Detail</div>
+                <div class="screen-pill ai">AI Suggest</div>
+              </div>
+            </div>
+
+            <!-- Explore tab -->
+            <div class="tab-col">
+              <div class="v-line" style="height:20px;"></div>
+              <div class="tab-chip chip-explore">✦ Explore</div>
+              <div class="v-line"></div>
+              <div class="screen-pill">Discover Feed</div>
+              <div class="screen-pill">AI Generate Trip</div>
+              <div class="screen-pill">Destination Info</div>
+            </div>
+
+            <!-- Profile tab -->
+            <div class="tab-col">
+              <div class="v-line" style="height:20px;"></div>
+              <div class="tab-chip chip-profile">◯ Profile</div>
+              <div class="v-line"></div>
+              <div class="screen-pill">Settings</div>
+              <div class="screen-pill">Saved Places</div>
+              <div class="screen-pill">Offline Trips</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PHONE MOCKUPS -->
+<div class="section-card">
+  <div class="section-title">Key Screen Mockups</div>
+  <div class="section-sub">Left: Trip List home screen (light). Right: Trip Detail with map at top (dark).</div>
+
+  <div class="phone-pair">
+
+    <!-- PHONE 1: Trip List Home -->
+    <div class="phone-wrap">
+      <div class="phone-label">Trips — Home</div>
+      <div class="phone" style="position:relative;">
+        <div class="notch-bar"><div class="notch"></div></div>
+        <div class="screen">
+          <div class="status"><span>9:41</span><span>●●●</span></div>
+          <div class="p-header">
+            <div class="p-greeting">Good morning</div>
+            <div class="p-title">My Trips</div>
+          </div>
+          <!-- Segment: Upcoming / Past -->
+          <div class="segment">
+            <div class="seg-btn active">Upcoming</div>
+            <div class="seg-btn">Past</div>
+            <div class="seg-btn">Drafts</div>
+          </div>
+          <!-- Trip cards -->
+          <div class="trip-cards">
+            <div class="tcard">
+              <div class="tcard-img" style="background:linear-gradient(135deg,#dde8d8,#b8d4c8);">🗼</div>
+              <div class="tcard-badge soon">In 4 days</div>
+              <div class="tcard-body">
+                <div class="tcard-name">Paris, France</div>
+                <div class="tcard-meta">Jun 12–18 · 6 days · 8 stops</div>
+              </div>
+            </div>
+            <div class="tcard">
+              <div class="tcard-img" style="background:linear-gradient(135deg,#e8e4d8,#d4c8b8);">⛩️</div>
+              <div class="tcard-badge">Aug 2</div>
+              <div class="tcard-body">
+                <div class="tcard-name">Kyoto, Japan</div>
+                <div class="tcard-meta">Aug 2–10 · 8 days · 12 stops</div>
+              </div>
+            </div>
+            <div class="tcard" style="opacity:0.55;">
+              <div class="tcard-img" style="background:linear-gradient(135deg,#d8e0e8,#b8c8d8);">🏔️</div>
+              <div class="tcard-badge" style="background:rgba(142,142,147,0.7);color:#fff;">Draft</div>
+              <div class="tcard-body">
+                <div class="tcard-name">Swiss Alps</div>
+                <div class="tcard-meta">No dates yet · 5 stops</div>
+              </div>
+            </div>
+          </div>
+          <!-- FAB -->
+          <div class="fab">+</div>
+        </div>
+        <div class="tab-bar">
+          <div class="tab-item active"><div class="tab-ico">✈️</div><span class="tab-name">Trips</span></div>
+          <div class="tab-item"><div class="tab-ico">✦</div><span class="tab-name">Explore</span></div>
+          <div class="tab-item"><div class="tab-ico">◯</div><span class="tab-name">Profile</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHONE 2: Trip Detail with map -->
+    <div class="phone-wrap">
+      <div class="phone-label">Trip Detail — Dark</div>
+      <div class="phone phone-dark" style="position:relative;">
+        <div class="notch-bar"><div class="notch"></div></div>
+        <div class="screen" style="background:#1c1c1e;">
+          <div class="status" style="color:#636366;"><span>9:41</span><span>●●●</span></div>
+          <!-- Map hero at top -->
+          <div class="map-hero map-hero-dark" style="position:relative;">
+            <div class="map-pin-sm" style="top:35px;left:52%;">
+              <div class="pin-head" style="background:#f5f5f0;border-color:#1c1c1e;"></div>
+              <div class="pin-bubble" style="background:#2c2c2e;color:#f5f5f0;">Paris 🗼</div>
+            </div>
+            <div style="position:absolute;top:8px;left:10px;background:rgba(28,28,30,0.88);backdrop-filter:blur(10px);border-radius:10px;padding:4px 10px;font-size:9px;font-weight:600;color:#f5f5f0;">← Back</div>
+            <div class="map-overlay-btn" style="background:rgba(44,44,46,0.88);color:#f5f5f0;">Expand map ↗</div>
+          </div>
+          <!-- Trip header -->
+          <div style="padding:10px 13px 4px;">
+            <div style="font-size:15px;font-weight:600;color:#f5f5f0;letter-spacing:-0.3px;">Paris, France</div>
+            <div style="font-size:10px;color:#636366;margin-top:1px;">Jun 12–18 · 6 days</div>
+          </div>
+          <!-- Day strip -->
+          <div class="detail-body">
+            <div class="day-strip">
+              <div class="day-pill"><span class="day-num">12</span>Thu</div>
+              <div class="day-pill active"><span class="day-num">13</span>Fri</div>
+              <div class="day-pill"><span class="day-num">14</span>Sat</div>
+              <div class="day-pill"><span class="day-num">15</span>Sun</div>
+            </div>
+            <!-- Activities -->
+            <div class="act-row">
+              <div class="act-dot" style="background:#34c759;"></div>
+              <div class="act-text">Eiffel Tower visit</div>
+              <div class="act-time">9:00 AM</div>
+            </div>
+            <div class="act-row">
+              <div class="act-dot" style="background:#007aff;"></div>
+              <div class="act-text">Café de Flore — lunch</div>
+              <div class="act-time">12:30 PM</div>
+            </div>
+            <div class="act-row">
+              <div class="act-dot" style="background:#ff9500;"></div>
+              <div class="act-text">Musée d'Orsay</div>
+              <div class="act-time">3:00 PM</div>
+            </div>
+            <!-- Quiet AI button -->
+            <div class="ai-btn">
+              <div class="ai-sparkle">✦</div>
+              <div class="ai-btn-text">Suggest more stops for this day</div>
+            </div>
+          </div>
+        </div>
+        <div class="tab-bar" style="background:rgba(28,28,30,0.92);border-color:rgba(255,255,255,0.1);">
+          <div class="tab-item active"><div class="tab-ico">✈️</div><span class="tab-name" style="color:#f5f5f0;">Trips</span></div>
+          <div class="tab-item"><div class="tab-ico">✦</div><span class="tab-name">Explore</span></div>
+          <div class="tab-item"><div class="tab-ico">◯</div><span class="tab-name">Profile</span></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- GESTURE + MICRO (unchanged, still valid) -->
+<div class="section-card">
+  <div class="section-title">Gestures & Microinteractions — Unchanged</div>
+  <div class="section-sub">All gestures from the previous version still apply. The trip list adds two new ones.</div>
+  <div class="micro-list">
+    <div class="micro-row">
+      <div class="micro-trigger">Swipe left on card</div>
+      <div class="micro-arrow">→</div>
+      <div class="micro-response">Reveals Delete / Archive actions under the card. Red for delete, grey for archive. Spring-back on cancel.</div>
+    </div>
+    <div class="micro-row">
+      <div class="micro-trigger">Tap trip card</div>
+      <div class="micro-arrow">→</div>
+      <div class="micro-response">Shared element hero transition — the card image morphs into the map hero at the top of Trip Detail. 350ms spring.</div>
+    </div>
+    <div class="micro-row">
+      <div class="micro-trigger">FAB tap (+)</div>
+      <div class="micro-arrow">→</div>
+      <div class="micro-response">FAB expands into a modal sheet with two options: "Build manually" / "Generate with AI". Backdrop blur appears.</div>
+    </div>
+    <div class="micro-row">
+      <div class="micro-trigger">✦ AI suggest btn</div>
+      <div class="micro-arrow">→</div>
+      <div class="micro-response">Quietly sits at the bottom of the day editor. Tap → shimmer skeleton rows appear, then real suggestions fade in staggered.</div>
+    </div>
+    <div class="micro-row">
+      <div class="micro-trigger">Expand map ↗</div>
+      <div class="micro-arrow">→</div>
+      <div class="micro-response">Map hero expands to full-screen with a scale-up spring. All itinerary pins appear as numbered markers. Tap pin → activity detail.</div>
+    </div>
+  </div>
+</div>
+
+<!-- OFFLINE -->
+<div class="section-card">
+  <div class="section-title">Offline Strategy — Unchanged</div>
+  <div class="offline-row">
+    <div class="offline-pill"><div class="offline-dot green"></div>Full offline — Trip list, itineraries, day plans</div>
+    <div class="offline-pill"><div class="offline-dot green"></div>Full offline — Cached map tiles per trip area</div>
+    <div class="offline-pill"><div class="offline-dot yellow"></div>Cached — Destination info, attraction details</div>
+    <div class="offline-pill"><div class="offline-dot red"></div>Online only — AI generation, live search, push notifications</div>
+  </div>
+</div>
+
+</body>
+</html>
