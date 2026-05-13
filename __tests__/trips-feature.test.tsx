@@ -7,6 +7,8 @@ import { render } from '@testing-library/react-native';
 import { ThemeProvider } from '../src/core/theme/theme-provider';
 import { TransportPill } from '../src/core/components/transport-pill';
 import { CategoryBadge } from '../src/core/components/category-badge';
+import { TripCard } from '../src/features/trips/components/trip-card';
+import { DayStrip } from '../src/features/trips/components/day-strip';
 
 describe('mock data shapes', () => {
   it('trip list entries have all required fields', () => {
@@ -94,5 +96,41 @@ describe('CategoryBadge', () => {
       </ThemeProvider>,
     );
     expect(getByText('Restaurant')).toBeTruthy();
+  });
+});
+
+describe('TripCard', () => {
+  it('renders trip name, destination, and status label', () => {
+    const trip = mockTripList[0];
+    const { getByText } = render(
+      <ThemeProvider>
+        <TripCard trip={trip} onPress={() => undefined} />
+      </ThemeProvider>,
+    );
+    expect(getByText('Paris Weekend')).toBeTruthy();
+    expect(getByText('Paris, France')).toBeTruthy();
+    expect(getByText('In 7 days')).toBeTruthy();
+  });
+
+  it('renders cover emoji', () => {
+    const trip = mockTripList[0];
+    const { getByText } = render(
+      <ThemeProvider>
+        <TripCard trip={trip} onPress={() => undefined} />
+      </ThemeProvider>,
+    );
+    expect(getByText('🗼')).toBeTruthy();
+  });
+});
+
+describe('DayStrip', () => {
+  it('renders all day pills with correct labels', () => {
+    const { getByText } = render(
+      <ThemeProvider>
+        <DayStrip days={mockTripDetail.days} activeDay="d1" onDayPress={() => undefined} />
+      </ThemeProvider>,
+    );
+    expect(getByText('Day 1')).toBeTruthy();
+    expect(getByText('Day 2')).toBeTruthy();
   });
 });

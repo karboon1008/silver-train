@@ -1,50 +1,66 @@
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 import { AppCard } from '@/core/components/app-card';
 import { AppText } from '@/core/components/app-text';
 import { useAppTheme } from '@/core/theme/theme-provider';
-import { tokens } from '@/core/theme/tokens';
+import type { Trip } from '@/types/trips';
 
-type Trip = (typeof import('@/mocks/trips').mockTrips)[keyof typeof import('@/mocks/trips').mockTrips][number];
-
-type TripCardProps = {
+type Props = {
   trip: Trip;
+  onPress: () => void;
 };
 
-export function TripCard({ trip }: TripCardProps) {
+export function TripCard({ trip, onPress }: Props) {
   const theme = useAppTheme();
 
   return (
-    <AppCard>
-      <View style={{ gap: theme.spacing.xs }}>
-        <AppText tone="accent" variant="label" weight="700">
-          {trip.destination}
-        </AppText>
-        <AppText variant="title" weight="700">
-          {trip.name}
-        </AppText>
-      </View>
-      <View style={{ gap: theme.spacing.xs }}>
-        <AppText tone="muted">{trip.dateRange}</AppText>
-        <AppText
-          style={{
-            alignSelf: 'flex-start',
-            backgroundColor: theme.semantic.surface,
-            borderRadius: theme.radii.pill,
-            paddingHorizontal: theme.spacing.md,
-            paddingVertical: theme.spacing.xs,
-          }}
-        >
-          {trip.status}
-        </AppText>
-      </View>
-      <View
-        style={{
-          height: 6,
-          borderRadius: theme.radii.pill,
-          backgroundColor: tokens.colors.slate,
-          opacity: 0.35,
-        }}
-      />
-    </AppCard>
+    <Pressable
+      onPress={onPress}
+      style={({ pressed }) => ({
+        transform: [{ scale: pressed ? 0.97 : 1 }],
+      })}
+    >
+      <AppCard>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.md }}>
+          <View
+            style={{
+              width: 44,
+              height: 44,
+              borderRadius: theme.radii.sm,
+              backgroundColor: theme.semantic.background,
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
+          >
+            <AppText variant="title">{trip.coverEmoji}</AppText>
+          </View>
+          <View style={{ flex: 1, gap: theme.spacing.xs }}>
+            <AppText variant="body" weight="600">
+              {trip.name}
+            </AppText>
+            <AppText variant="label" tone="muted">
+              {trip.destination}
+            </AppText>
+          </View>
+          <View
+            style={{
+              paddingVertical: theme.spacing.xs,
+              paddingHorizontal: theme.spacing.sm,
+              borderRadius: theme.radii.pill,
+              backgroundColor: `${theme.semantic.accent}25`,
+            }}
+          >
+            <AppText variant="caption" weight="600" style={{ color: theme.semantic.accent }}>
+              {trip.statusLabel}
+            </AppText>
+          </View>
+        </View>
+        {trip.stopCount > 0 && (
+          <AppText variant="label" tone="muted">
+            {trip.stopCount} {trip.stopCount === 1 ? 'stop' : 'stops'} ·{' '}
+            {trip.startDate} – {trip.endDate}
+          </AppText>
+        )}
+      </AppCard>
+    </Pressable>
   );
 }
