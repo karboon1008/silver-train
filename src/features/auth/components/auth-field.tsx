@@ -42,6 +42,7 @@ export function AuthField({
         autoCapitalize={autoCapitalize}
         placeholder={placeholder}
         placeholderTextColor={theme.semantic.mutedText}
+        accessibilityLabel={label}
         style={{
           borderWidth: 1,
           borderColor: error ? '#dc2626' : theme.semantic.border,

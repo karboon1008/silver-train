@@ -22,7 +22,7 @@ export default function SignUpScreen() {
 
   async function handleSignUp() {
     const nErr = name.trim() ? '' : 'Name is required';
-    const eErr = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? '' : 'Enter a valid email';
+    const eErr = !email ? 'Email is required' : /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? '' : 'Enter a valid email';
     const pErr = password.length >= 6 ? '' : 'Password must be at least 6 characters';
     setNameError(nErr);
     setEmailError(eErr);
