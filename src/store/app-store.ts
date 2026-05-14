@@ -51,7 +51,7 @@ export const useAppStore = create<AppState>((set) => ({
     if (!result.ok) throw new Error(result.error);
     set({ isAuthenticated: true, user: { name, email } });
   },
-  signOut: () => set({ isAuthenticated: false }),
+  signOut: () => set({ isAuthenticated: false, user: null }),
   setThemePreference: (value) => set({ themePreference: value }),
   addTrip: (detail) => set((state) => ({ trips: [...state.trips, detail] })),
   updateTrip: (id, patch) =>
