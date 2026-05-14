@@ -50,7 +50,7 @@ function getToneColor(
     case 'accent':
       return theme.semantic.accent;
     case 'inverse':
-      return theme.colors.white;
+      return theme.semantic.background;
     case 'default':
     default:
       return theme.semantic.text;

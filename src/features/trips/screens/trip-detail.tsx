@@ -14,22 +14,30 @@ import type { Stop, Trip, TripDetail } from '@/types/trips';
 
 type Props = {
   tripDetail: TripDetail;
+  onBack: () => void;
   onStopPress: (stop: Stop) => void;
   onEditSave: (patch: Partial<Trip>) => void;
   onDelete: () => void;
   onAddStop: (dayId: string, stop: Stop) => void;
   onRemoveStop: (dayId: string, stopId: string) => void;
   onRemarkChange: (stopId: string, remark: string) => void;
+  onAddDay: () => void;
+  onDeleteDay: (dayId: string) => void;
+  onMoveDay: (dayId: string, direction: 'up' | 'down') => void;
 };
 
 export default function TripDetailScreen({
   tripDetail,
+  onBack,
   onStopPress,
   onEditSave,
   onDelete,
   onAddStop,
   onRemoveStop,
   onRemarkChange,
+  onAddDay,
+  onDeleteDay,
+  onMoveDay,
 }: Props) {
   const { trip, days } = tripDetail;
   const theme = useAppTheme();
@@ -68,12 +76,23 @@ export default function TripDetailScreen({
         subtitle={
           trip.startDate !== '' ? `${trip.startDate} – ${trip.endDate}` : 'Unscheduled'
         }
+        onBack={onBack}
         actionLabel="✏️ Edit"
         onPressAction={() => setEditVisible(true)}
       />
 
       <MapHero destination={trip.destination} onExpand={() => undefined} />
-      <DayStrip days={days} activeDay={activeDayId} onDayPress={setActiveDayId} />
+      <DayStrip
+        days={days}
+        activeDay={activeDayId}
+        onDayPress={setActiveDayId}
+        onAddDay={onAddDay}
+        onDeleteDay={(dayId) => {
+          onDeleteDay(dayId);
+          if (activeDayId === dayId) setActiveDayId(days.find((d) => d.id !== dayId)?.id ?? '');
+        }}
+        onMoveDay={onMoveDay}
+      />
 
       {activeDay !== undefined && (
         <View style={{ marginTop: theme.spacing.sm }}>

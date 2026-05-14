@@ -49,6 +49,7 @@ export default function SignUpScreen() {
       alternateLabel="Already have an account?"
       alternateActionLabel="Sign in"
       onPressAlternate={() => router.push(routes.signIn)}
+      onBack={() => router.back()}
     >
       <AuthField
         label="Name"

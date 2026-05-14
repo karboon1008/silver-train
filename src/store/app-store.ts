@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { signInWithEmail, signUpWithEmail } from '@/services/supabase';
 import { mockTripDetail } from '@/mocks/trip-detail';
-import type { Trip, TripDetail, Stop } from '@/types/trips';
+import type { Trip, TripDay, TripDetail, Stop } from '@/types/trips';
 
 export type ThemePreference = 'system' | 'light' | 'dark';
 
@@ -25,6 +25,9 @@ export type AppState = {
   addStop: (tripId: string, dayId: string, stop: Stop) => void;
   removeStop: (tripId: string, dayId: string, stopId: string) => void;
   updateRemark: (tripId: string, stopId: string, remark: string) => void;
+  addDay: (tripId: string) => void;
+  deleteDay: (tripId: string, dayId: string) => void;
+  moveDay: (tripId: string, dayId: string, direction: 'up' | 'down') => void;
 };
 
 const defaultUser: AppUser = { name: 'Ava Traveler', email: 'ava@example.com' };
@@ -98,6 +101,57 @@ export const useAppStore = create<AppState>((set) => ({
             ...day,
             stops: day.stops.map((s) => (s.id === stopId ? { ...s, remark } : s)),
           })),
+        };
+      }),
+    })),
+  addDay: (tripId) =>
+    set((state) => ({
+      trips: state.trips.map((d) => {
+        if (d.trip.id !== tripId) return d;
+        const lastDay = d.days[d.days.length - 1];
+        const nextDate = (() => {
+          if (lastDay?.date && /^\d{4}-\d{2}-\d{2}$/.test(lastDay.date)) {
+            const [y, m, day] = lastDay.date.split('-').map(Number);
+            const dt = new Date(y, m - 1, day + 1);
+            if (!isNaN(dt.getTime())) {
+              return `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+            }
+          }
+          return new Date().toISOString().slice(0, 10);
+        })();
+        const newDay: TripDay = {
+          id: `day-${Date.now()}`,
+          date: nextDate,
+          dayNumber: d.days.length + 1,
+          stops: [],
+        };
+        return { ...d, days: [...d.days, newDay] };
+      }),
+    })),
+  deleteDay: (tripId, dayId) =>
+    set((state) => ({
+      trips: state.trips.map((d) => {
+        if (d.trip.id !== tripId) return d;
+        const remaining = d.days.filter((day) => day.id !== dayId);
+        return {
+          ...d,
+          days: remaining.map((day, i) => ({ ...day, dayNumber: i + 1 })),
+        };
+      }),
+    })),
+  moveDay: (tripId, dayId, direction) =>
+    set((state) => ({
+      trips: state.trips.map((d) => {
+        if (d.trip.id !== tripId) return d;
+        const idx = d.days.findIndex((day) => day.id === dayId);
+        if (idx === -1) return d;
+        const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+        if (swapIdx < 0 || swapIdx >= d.days.length) return d;
+        const newDays = [...d.days];
+        [newDays[idx], newDays[swapIdx]] = [newDays[swapIdx], newDays[idx]];
+        return {
+          ...d,
+          days: newDays.map((day, i) => ({ ...day, dayNumber: i + 1 })),
         };
       }),
     })),

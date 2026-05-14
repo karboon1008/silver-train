@@ -3,6 +3,7 @@ import { Pressable, TextInput, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { AppButton } from '@/core/components/app-button';
 import { AppText } from '@/core/components/app-text';
+import { DatePickerField } from '@/core/components/date-picker-field';
 import { Screen } from '@/core/components/screen';
 import { SearchField } from '@/core/components/search-field';
 import { SectionHeader } from '@/core/components/section-header';
@@ -115,7 +116,7 @@ export default function NewTripScreen() {
   if (step === 1) {
     return (
       <Screen scroll>
-        <SectionHeader title="Where to?" subtitle="Step 1 of 3" />
+        <SectionHeader title="Where to?" subtitle="Step 1 of 3" onBack={() => router.back()} />
         <SearchField
           value={destinationQuery}
           onChangeText={setDestinationQuery}
@@ -186,36 +187,24 @@ export default function NewTripScreen() {
   if (step === 2) {
     return (
       <Screen scroll>
-        <SectionHeader title="When?" subtitle="Step 2 of 3" />
+        <SectionHeader title="When?" subtitle="Step 2 of 3" onBack={() => setStep(1)} />
         <AppText variant="title" weight="700" style={{ textAlign: 'center' }}>
           ✈️ {destination}
         </AppText>
-        <View style={{ flexDirection: 'row', gap: theme.spacing.md }}>
-          <View style={{ flex: 1, gap: theme.spacing.xs }}>
-            <AppText variant="caption" weight="600">
-              FROM
-            </AppText>
-            <TextInput
-              value={startDate}
-              onChangeText={setStartDate}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={theme.semantic.mutedText}
-              style={inputStyle}
-            />
-          </View>
-          <View style={{ flex: 1, gap: theme.spacing.xs }}>
-            <AppText variant="caption" weight="600">
-              TO
-            </AppText>
-            <TextInput
-              value={endDate}
-              onChangeText={setEndDate}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor={theme.semantic.mutedText}
-              style={inputStyle}
-            />
-          </View>
-        </View>
+        <DatePickerField
+          label="From"
+          value={startDate}
+          onChange={(iso) => {
+            setStartDate(iso);
+            if (endDate && endDate < iso) setEndDate(iso);
+          }}
+        />
+        <DatePickerField
+          label="To"
+          value={endDate}
+          onChange={setEndDate}
+          minimumDate={startDate ? new Date(`${startDate}T00:00:00`) : undefined}
+        />
         {nights > 0 && (
           <View
             style={{
@@ -251,7 +240,7 @@ export default function NewTripScreen() {
   // Step 3 — Name it
   return (
     <Screen scroll>
-      <SectionHeader title="Name your trip" subtitle="Step 3 of 3" />
+      <SectionHeader title="Name your trip" subtitle="Step 3 of 3" onBack={() => setStep(2)} />
       <View style={{ gap: theme.spacing.xs }}>
         <AppText variant="caption" weight="600">
           TRIP NAME

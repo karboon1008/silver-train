@@ -224,12 +224,12 @@ describe('TripDetailScreen', () => {
 describe('PlaceDetailScreen', () => {
   it('renders place name, category badge, rating, and hours', () => {
     const place = mockTripDetail.days[0].stops[0].place;
-    const { getByText } = render(
+    const { getByText, getAllByText } = render(
       <ThemeProvider>
         <PlaceDetailScreen place={place} remark="" onRemarkChange={() => undefined} />
       </ThemeProvider>,
     );
-    expect(getByText('Eiffel Tower')).toBeTruthy();
+    expect(getAllByText('Eiffel Tower').length).toBeGreaterThan(0);
     expect(getByText('Landmark')).toBeTruthy();
     expect(getByText('★ 4.7')).toBeTruthy();
     expect(getByText('€29.40')).toBeTruthy();

@@ -19,6 +19,9 @@ export default function TripDetailRoute() {
   const addStop = useAppStore((state) => state.addStop);
   const removeStop = useAppStore((state) => state.removeStop);
   const updateRemark = useAppStore((state) => state.updateRemark);
+  const addDay = useAppStore((state) => state.addDay);
+  const deleteDay = useAppStore((state) => state.deleteDay);
+  const moveDay = useAppStore((state) => state.moveDay);
 
   if (tripDetail === undefined) {
     return (
@@ -31,15 +34,19 @@ export default function TripDetailRoute() {
   return (
     <TripDetailScreen
       tripDetail={tripDetail}
+      onBack={() => router.back()}
       onStopPress={(stop: Stop) => router.push(routes.placeDetail(id, stop.place.id))}
       onEditSave={(patch: Partial<Trip>) => updateTrip(id, patch)}
       onDelete={() => {
         deleteTrip(id);
-        router.replace(routes.trips);
+        router.back();
       }}
       onAddStop={(dayId: string, stop: Stop) => addStop(id, dayId, stop)}
       onRemoveStop={(dayId: string, stopId: string) => removeStop(id, dayId, stopId)}
       onRemarkChange={(stopId: string, remark: string) => updateRemark(id, stopId, remark)}
+      onAddDay={() => addDay(id)}
+      onDeleteDay={(dayId: string) => deleteDay(id, dayId)}
+      onMoveDay={(dayId: string, direction: 'up' | 'down') => moveDay(id, dayId, direction)}
     />
   );
 }

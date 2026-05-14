@@ -2,6 +2,7 @@ import { View, TextInput } from 'react-native';
 import { AppText } from '@/core/components/app-text';
 import { CategoryBadge } from '@/core/components/category-badge';
 import { Screen } from '@/core/components/screen';
+import { SectionHeader } from '@/core/components/section-header';
 import { useAppTheme } from '@/core/theme/theme-provider';
 import type { Place } from '@/types/trips';
 
@@ -9,9 +10,10 @@ type Props = {
   place: Place;
   remark: string;
   onRemarkChange: (value: string) => void;
+  onBack?: () => void;
 };
 
-export default function PlaceDetailScreen({ place, remark, onRemarkChange }: Props) {
+export default function PlaceDetailScreen({ place, remark, onRemarkChange, onBack }: Props) {
   const theme = useAppTheme();
 
   const infoRows = [
@@ -22,6 +24,7 @@ export default function PlaceDetailScreen({ place, remark, onRemarkChange }: Pro
 
   return (
     <Screen scroll>
+      <SectionHeader title={place.name} onBack={onBack} />
       {/* Hero placeholder */}
       <View
         style={{
