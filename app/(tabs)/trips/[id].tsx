@@ -2,19 +2,23 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { EmptyState } from '@/core/components/empty-state';
 import { Screen } from '@/core/components/screen';
 import TripDetailScreen from '@/features/trips/screens/trip-detail';
-import { mockTripDetails } from '@/mocks/trip-detail';
 import { routes } from '@/core/constants/routes';
-import type { Stop } from '@/types/trips';
+import { useAppStore } from '@/store/app-store';
+import type { Stop, Trip } from '@/types/trips';
 
 export default function TripDetailRoute() {
   const rawId = useLocalSearchParams<{ id: string }>().id;
-  const id = Array.isArray(rawId) ? rawId[0] ?? '' : rawId;
+  const id = Array.isArray(rawId) ? (rawId[0] ?? '') : rawId;
   const router = useRouter();
-  const tripDetail = mockTripDetails[id];
 
-  function handleStopPress(stop: Stop) {
-    router.push(routes.placeDetail(id, stop.place.id));
-  }
+  const tripDetail = useAppStore((state) =>
+    state.trips.find((d) => d.trip.id === id),
+  );
+  const updateTrip = useAppStore((state) => state.updateTrip);
+  const deleteTrip = useAppStore((state) => state.deleteTrip);
+  const addStop = useAppStore((state) => state.addStop);
+  const removeStop = useAppStore((state) => state.removeStop);
+  const updateRemark = useAppStore((state) => state.updateRemark);
 
   if (tripDetail === undefined) {
     return (
@@ -24,5 +28,18 @@ export default function TripDetailRoute() {
     );
   }
 
-  return <TripDetailScreen tripDetail={tripDetail} onStopPress={handleStopPress} />;
+  return (
+    <TripDetailScreen
+      tripDetail={tripDetail}
+      onStopPress={(stop: Stop) => router.push(routes.placeDetail(id, stop.place.id))}
+      onEditSave={(patch: Partial<Trip>) => updateTrip(id, patch)}
+      onDelete={() => {
+        deleteTrip(id);
+        router.replace(routes.trips);
+      }}
+      onAddStop={(dayId: string, stop: Stop) => addStop(id, dayId, stop)}
+      onRemoveStop={(dayId: string, stopId: string) => removeStop(id, dayId, stopId)}
+      onRemarkChange={(stopId: string, remark: string) => updateRemark(id, stopId, remark)}
+    />
+  );
 }
