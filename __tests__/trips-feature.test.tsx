@@ -187,7 +187,15 @@ describe('TripDetailScreen', () => {
   it('renders trip name, map hero, and all days', () => {
     const { getByText } = render(
       <ThemeProvider>
-        <TripDetailScreen tripDetail={mockTripDetail} onStopPress={() => undefined} />
+        <TripDetailScreen
+          tripDetail={mockTripDetail}
+          onStopPress={() => undefined}
+          onEditSave={() => undefined}
+          onDelete={() => undefined}
+          onAddStop={() => undefined}
+          onRemoveStop={() => undefined}
+          onRemarkChange={() => undefined}
+        />
       </ThemeProvider>,
     );
     expect(getByText('Paris Weekend')).toBeTruthy();
@@ -198,7 +206,15 @@ describe('TripDetailScreen', () => {
   it('renders stops for the default active day', () => {
     const { getByText } = render(
       <ThemeProvider>
-        <TripDetailScreen tripDetail={mockTripDetail} onStopPress={() => undefined} />
+        <TripDetailScreen
+          tripDetail={mockTripDetail}
+          onStopPress={() => undefined}
+          onEditSave={() => undefined}
+          onDelete={() => undefined}
+          onAddStop={() => undefined}
+          onRemoveStop={() => undefined}
+          onRemarkChange={() => undefined}
+        />
       </ThemeProvider>,
     );
     expect(getByText('Eiffel Tower')).toBeTruthy();
@@ -218,5 +234,39 @@ describe('PlaceDetailScreen', () => {
     expect(getByText('★ 4.7')).toBeTruthy();
     expect(getByText('€29.40')).toBeTruthy();
     expect(getByText('9:00 AM – 11:45 PM')).toBeTruthy();
+  });
+});
+
+describe('StopCard — place detail pills and inline remark', () => {
+  it('renders rating, opening hours, and admission price pills', () => {
+    const stop = mockTripDetail.days[0]!.stops[0]!; // Eiffel Tower, rating 4.7
+    const { getByText } = render(
+      <ThemeProvider>
+        <StopCard stop={stop} isFirst isLast={false} />
+      </ThemeProvider>,
+    );
+    expect(getByText('★ 4.7')).toBeTruthy();
+    expect(getByText('🕘 9:00 AM – 11:45 PM')).toBeTruthy();
+    expect(getByText('🎫 €29.40')).toBeTruthy();
+  });
+
+  it('shows collapsed remark placeholder when remark is empty', () => {
+    const stop = { ...mockTripDetail.days[0]!.stops[0]!, remark: '' };
+    const { getByText } = render(
+      <ThemeProvider>
+        <StopCard stop={stop} isFirst isLast={false} />
+      </ThemeProvider>,
+    );
+    expect(getByText('Add a note…')).toBeTruthy();
+  });
+
+  it('shows existing remark text when remark is set', () => {
+    const stop = mockTripDetail.days[0]!.stops[1]!; // remark: 'Book tickets 2 days early'
+    const { getByText } = render(
+      <ThemeProvider>
+        <StopCard stop={stop} isFirst={false} isLast={false} />
+      </ThemeProvider>,
+    );
+    expect(getByText('Book tickets 2 days early')).toBeTruthy();
   });
 });

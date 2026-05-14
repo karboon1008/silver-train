@@ -1,4 +1,5 @@
-import { Pressable, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Pressable, TextInput, View } from 'react-native';
 import { AppText } from '@/core/components/app-text';
 import { CategoryBadge } from '@/core/components/category-badge';
 import { TransportPill } from '@/core/components/transport-pill';
@@ -12,15 +13,38 @@ type Props = {
   isFirst: boolean;
   isLast: boolean;
   onPress?: () => void;
+  onRemove?: () => void;
+  onRemarkChange?: (remark: string) => void;
 };
 
-export function StopCard({ stop, isFirst, isLast, onPress }: Props) {
+export function StopCard({
+  stop,
+  isFirst,
+  isLast,
+  onPress,
+  onRemove,
+  onRemarkChange,
+}: Props) {
   const theme = useAppTheme();
   const dotColor = TIMELINE_DOT_COLORS[stop.orderIndex % TIMELINE_DOT_COLORS.length];
+  const [remarkExpanded, setRemarkExpanded] = useState(false);
+  const [localRemark, setLocalRemark] = useState(stop.remark);
+
+  function handleRemarkCommit() {
+    setRemarkExpanded(false);
+    onRemarkChange?.(localRemark);
+  }
+
+  function confirmRemove() {
+    Alert.alert('Remove stop', `Remove "${stop.place.name}" from this day?`, [
+      { text: 'Cancel', style: 'cancel' },
+      { text: 'Remove', style: 'destructive', onPress: onRemove },
+    ]);
+  }
 
   return (
     <View style={{ flexDirection: 'row', gap: theme.spacing.md }}>
-      {/* Timeline connector column */}
+      {/* Timeline column */}
       <View style={{ alignItems: 'center', width: 20, paddingTop: theme.spacing.md }}>
         <View
           style={{
@@ -30,12 +54,7 @@ export function StopCard({ stop, isFirst, isLast, onPress }: Props) {
           }}
         />
         <View
-          style={{
-            width: 12,
-            height: 12,
-            borderRadius: 6,
-            backgroundColor: dotColor,
-          }}
+          style={{ width: 12, height: 12, borderRadius: 6, backgroundColor: dotColor }}
         />
         <View
           style={{
@@ -46,23 +65,25 @@ export function StopCard({ stop, isFirst, isLast, onPress }: Props) {
         />
       </View>
 
-      {/* Card body */}
-      <Pressable
-        onPress={onPress}
+      {/* Card */}
+      <View
         style={{
           flex: 1,
           backgroundColor: theme.semantic.surface,
           borderRadius: theme.radii.sm,
           padding: theme.spacing.md,
           borderWidth: 1,
-          borderColor: theme.semantic.border,
+          borderColor: remarkExpanded ? theme.semantic.accent : theme.semantic.border,
           marginBottom: theme.spacing.sm,
           gap: theme.spacing.xs,
           ...theme.shadows.card,
         }}
       >
-        {/* Row 1: emoji thumbnail + place name + time */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}>
+        {/* Row 1: emoji + name + time + × */}
+        <Pressable
+          onPress={onPress}
+          style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm }}
+        >
           <View
             style={{
               width: 28,
@@ -75,30 +96,148 @@ export function StopCard({ stop, isFirst, isLast, onPress }: Props) {
           >
             <AppText variant="body">{stop.place.thumbnailEmoji}</AppText>
           </View>
-          <AppText variant="body" weight="500" style={{ flex: 1 }} numberOfLines={1}>
+          <AppText
+            variant="body"
+            weight="500"
+            style={{ flex: 1 }}
+            numberOfLines={1}
+          >
             {stop.place.name}
           </AppText>
           <AppText variant="caption" tone="muted">
             {stop.scheduledTime}
           </AppText>
-        </View>
+          {onRemove !== undefined && (
+            <Pressable onPress={confirmRemove} hitSlop={8} style={{ padding: 4 }}>
+              <AppText variant="body" style={{ color: '#dc2626', fontSize: 18 }}>
+                ×
+              </AppText>
+            </Pressable>
+          )}
+        </Pressable>
 
-        {/* Row 2: category badge + remark */}
-        <View style={{ flexDirection: 'row', alignItems: 'center', gap: theme.spacing.sm, flexWrap: 'wrap' }}>
-          <CategoryBadge category={stop.place.category} />
-          {stop.remark !== '' && (
+        {/* Row 2: category badge */}
+        <CategoryBadge category={stop.place.category} />
+
+        {/* Row 3: detail pills — only shown when data is available */}
+        {(stop.place.rating > 0 ||
+          stop.place.openingHours !== '' ||
+          stop.place.admissionPrice !== '') && (
+          <View style={{ flexDirection: 'row', flexWrap: 'wrap', gap: theme.spacing.xs }}>
+            {stop.place.rating > 0 && (
+              <View
+                style={{
+                  paddingHorizontal: theme.spacing.sm,
+                  paddingVertical: 3,
+                  borderRadius: 6,
+                  backgroundColor: theme.semantic.card,
+                  borderWidth: 1,
+                  borderColor: theme.semantic.border,
+                }}
+              >
+                <AppText variant="label">★ {stop.place.rating}</AppText>
+              </View>
+            )}
+            {stop.place.openingHours !== '' && (
+              <View
+                style={{
+                  paddingHorizontal: theme.spacing.sm,
+                  paddingVertical: 3,
+                  borderRadius: 6,
+                  backgroundColor: theme.semantic.card,
+                  borderWidth: 1,
+                  borderColor: theme.semantic.border,
+                }}
+              >
+                <AppText variant="label">🕘 {stop.place.openingHours}</AppText>
+              </View>
+            )}
+            {stop.place.admissionPrice !== '' && (
+              <View
+                style={{
+                  paddingHorizontal: theme.spacing.sm,
+                  paddingVertical: 3,
+                  borderRadius: 6,
+                  backgroundColor: theme.semantic.card,
+                  borderWidth: 1,
+                  borderColor: theme.semantic.border,
+                }}
+              >
+                <AppText variant="label">🎫 {stop.place.admissionPrice}</AppText>
+              </View>
+            )}
+          </View>
+        )}
+
+        {/* Row 4: inline remark */}
+        {remarkExpanded ? (
+          <View
+            style={{
+              borderWidth: 1,
+              borderColor: theme.semantic.accent,
+              borderRadius: 6,
+              padding: theme.spacing.sm,
+              backgroundColor: `${theme.semantic.accent}08`,
+            }}
+          >
+            <View
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'space-between',
+                marginBottom: theme.spacing.xs,
+              }}
+            >
+              <AppText variant="caption" tone="accent">
+                ✎ Note
+              </AppText>
+              <Pressable onPress={handleRemarkCommit}>
+                <AppText variant="caption" tone="muted">
+                  Done
+                </AppText>
+              </Pressable>
+            </View>
+            <TextInput
+              autoFocus
+              value={localRemark}
+              onChangeText={setLocalRemark}
+              onBlur={handleRemarkCommit}
+              placeholder="Add a note about this place…"
+              placeholderTextColor={theme.semantic.mutedText}
+              multiline
+              style={{
+                color: theme.semantic.text,
+                fontSize: theme.typography.body,
+              }}
+            />
+          </View>
+        ) : (
+          <Pressable
+            onPress={() => setRemarkExpanded(true)}
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              gap: theme.spacing.xs,
+              padding: theme.spacing.xs,
+              borderWidth: 1,
+              borderStyle: 'dashed',
+              borderColor: theme.semantic.border,
+              borderRadius: 6,
+            }}
+          >
+            <AppText variant="caption" tone="muted">
+              ✎
+            </AppText>
             <AppText
               variant="caption"
               tone="muted"
-              style={{ fontStyle: 'italic', flex: 1 }}
-              numberOfLines={1}
+              style={{ fontStyle: localRemark ? 'italic' : 'normal' }}
             >
-              {stop.remark}
+              {localRemark || 'Add a note…'}
             </AppText>
-          )}
-        </View>
+          </Pressable>
+        )}
 
-        {/* Row 3: transport pill */}
+        {/* Row 5: transport pill */}
         {stop.transport !== null && (
           <TransportPill
             mode={stop.transport.mode}
@@ -106,7 +245,7 @@ export function StopCard({ stop, isFirst, isLast, onPress }: Props) {
             routeLabel={stop.transport.routeLabel}
           />
         )}
-      </Pressable>
+      </View>
     </View>
   );
 }
