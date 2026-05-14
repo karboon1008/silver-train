@@ -40,7 +40,7 @@ const STUB_STOPS: Array<Omit<Stop, 'id' | 'orderIndex'>> = [
   },
 ];
 
-export async function generateTrip(): Promise<{ ok: boolean; reason?: string }> {
+export async function generateTrip(): Promise<{ ok: true } | { ok: false; reason: string }> {
   return { ok: false, reason: 'not-connected' };
 }
 
