@@ -7,8 +7,8 @@ import { Screen } from '@/core/components/screen';
 import { SectionHeader } from '@/core/components/section-header';
 import { SegmentedControl } from '@/core/components/segmented-control';
 import { TripCard } from '@/features/trips/components/trip-card';
-import { mockTrips } from '@/mocks/trips';
 import { routes } from '@/core/constants/routes';
+import { useAppStore } from '@/store/app-store';
 import type { Trip } from '@/types/trips';
 
 type TripSegment = 'Upcoming' | 'Past' | 'Drafts';
@@ -17,7 +17,13 @@ const SEGMENTS = ['Upcoming', 'Past', 'Drafts'] as const satisfies readonly Trip
 export default function TripsScreen() {
   const [segment, setSegment] = useState<TripSegment>('Upcoming');
   const router = useRouter();
-  const trips = mockTrips[segment];
+  const tripDetails = useAppStore((state) => state.trips);
+
+  const trips = tripDetails.map((d) => d.trip).filter((t) => {
+    if (segment === 'Upcoming') return t.status === 'upcoming';
+    if (segment === 'Past') return t.status === 'past';
+    return t.status === 'draft';
+  });
 
   function handleTripPress(trip: Trip) {
     router.push(routes.tripDetail(trip.id));
@@ -30,7 +36,11 @@ export default function TripsScreen() {
       <View style={{ gap: 16, paddingBottom: 96 }}>
         {trips.length > 0 ? (
           trips.map((trip) => (
-            <TripCard key={trip.id} trip={trip} onPress={() => handleTripPress(trip)} />
+            <TripCard
+              key={trip.id}
+              trip={trip}
+              onPress={() => handleTripPress(trip)}
+            />
           ))
         ) : (
           <EmptyState
@@ -39,7 +49,10 @@ export default function TripsScreen() {
           />
         )}
       </View>
-      <FloatingActionButton label="Plan a trip" onPress={() => undefined} />
+      <FloatingActionButton
+        label="Plan a trip"
+        onPress={() => router.push(routes.newTrip())}
+      />
     </Screen>
   );
 }
